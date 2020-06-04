@@ -29,12 +29,17 @@ public class MyPersistentService extends Service {
         super.onCreate();
         Log.d(TAG, "onCreate: Service Created");
 
-        sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
-        sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_RUNNING);
+        sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE); //Assigning the shared preferences
+        sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_RUNNING); //Editing the shared preferences
         Notification notification = createPersistentNotification(false, null);
         startForeground(ForegroundServiceConstants.DEF_NOTIFICATION_ID, notification);
     }
 
+    /**
+     * Helper function to edit shared preference file.
+     *
+     * @param setState State from ForegroundServiceConstants
+     */
     private void sharedPreferencesHelper(final int setState) {
         Log.d(TAG, "sharedPreferencesHelper: Setting Shared Preference Running To: " + setState);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -51,7 +56,7 @@ public class MyPersistentService extends Service {
      * Create a new persistent notification
      *
      * @param isUpdate is this new notification an update to current one?
-     * @param update String that is to be updated will current. Send "null" if isUpdate is false.
+     * @param update   String that is to be updated will current. Send "null" if isUpdate is false.
      * @return New Notification with given parameters.
      */
     private Notification createPersistentNotification(final boolean isUpdate, final String update) {
