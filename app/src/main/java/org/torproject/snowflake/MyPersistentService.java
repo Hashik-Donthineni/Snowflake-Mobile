@@ -7,16 +7,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 
-//Main foreground service to handle network calls and to relay the data in the back ground.
+/**
+ * Main Snowflake implementation of foreground service to relay data in the background.
+ */
 public class MyPersistentService extends Service {
     private static final String TAG = "MyPersistentService";
     private SharedPreferences sharedPreferences;
+    private boolean isServiceStarted;
+    private PowerManager.WakeLock wakeLock;
 
     @Nullable
     @Override
@@ -30,12 +35,13 @@ public class MyPersistentService extends Service {
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
 
         if (intent != null) {
-//            if (intent.getAction().equals(ForegroundServiceConstants.ACTION_START))
-//                //TODO: Start Service
-//            else
-//                //TODO: Stop Service
+            if (intent.getAction().equals(ForegroundServiceConstants.ACTION_START))
+                startService();
+            else
+                stopService();
         } else {
             Log.d("onStartCommand:", "Null intent detected"); //Intent is null if system restarts the service.
+            startService(); //Starting the service since it's a "restart" of the service.
         }
 
         //If the service is killed. OS will restart this service if it's START_STICKY.
@@ -114,4 +120,45 @@ public class MyPersistentService extends Service {
 
         return builder.build();
     }
+
+    //Starting and stopping service
+
+    /**
+     * Use to star/re-start the service
+     */
+    private void startService() {
+        if (isServiceStarted) {
+            Log.d(TAG, "startService: Service Already running.");
+            return;
+        }
+        Log.d(TAG, "startService: Starting foreground service");
+        isServiceStarted = true;
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag");
+        wakeLock.acquire(); //WakeLock acquired for unlimited amount of time.
+
+        ///
+        //TODO: Start WebRTC connection.
+    }
+
+    /**
+     * Use to stop the service.
+     */
+    private void stopService() {
+        Log.d(TAG, "stopService:Stopping the foreground service");
+        try {
+            if (wakeLock != null && wakeLock.isHeld()) {
+                wakeLock.release();
+            }
+            stopForeground(true); //To remove the notification.
+            stopSelf(); //Calls onDestroy to destroy the service and dispose all the connections
+        } catch (Exception e) {
+            Log.d(TAG, "stopService: Failed with: " + e.getMessage());
+        }
+        isServiceStarted = false;
+    }
+
+    /////////////////////////////////////
 }
