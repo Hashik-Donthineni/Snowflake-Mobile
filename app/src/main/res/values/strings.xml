@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Snowflake</string>
+    <string name="sharedpreference_file">org.torproject.snowflake.snowflake_preferences</string>
+    <string name="is_service_running_bool">is_service_running</string>
 </resources>
