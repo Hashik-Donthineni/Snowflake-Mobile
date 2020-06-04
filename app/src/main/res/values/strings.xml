@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">Snowflake</string>
+    <string name="app_name">TestFlake</string>
     <string name="sharedpreference_file">org.torproject.snowflake.snowflake_preferences</string>
     <string name="is_service_running_bool">is_service_running</string>
+    <string name="not_channel_desc">This Channel should not be muted. The Android system will consider Snowflake not import and will kill the service if it\'s muted.</string>
+    <string name="initial_run_boolean">initial_run</string>
+    <string name="not_channel_name">Snowflake Service</string>
 </resources>

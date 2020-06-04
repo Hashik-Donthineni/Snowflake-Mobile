@@ -1,7 +1,11 @@
 package org.torproject.snowflake;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
@@ -21,7 +25,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
+
+        //Creating notification channel if app is being run for the first time
+        if (sharedPreferences.getBoolean(getString(R.string.initial_run_boolean), true)) {
+            createNotificationChannel();
+            //Setting initial run to false.
+            sharedPreferences.edit().putBoolean(getString(R.string.initial_run_boolean), false).apply();
+        }
 
         Button startButton = findViewById(R.id.start_button);
         startButton.setOnClickListener(v -> {
@@ -56,5 +68,24 @@ public class MainActivity extends AppCompatActivity {
      */
     private boolean isServiceRunning() {
         return sharedPreferences.getBoolean(getString(R.string.is_service_running_bool), false);
+    }
+
+    /**
+     * Used to create a new notification channel if app is started for the first time on a device.
+     */
+    private void createNotificationChannel() {
+        //Versions after Android Oreo mandates the use of notification channels.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            NotificationChannel channel = new NotificationChannel(ForegroundServiceConstants.NOTIFICATION_CHANNEL_ID,
+                    getString(R.string.not_channel_name),
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription(getString(R.string.not_channel_desc));
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
+            channel.setSound(null, null);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }
