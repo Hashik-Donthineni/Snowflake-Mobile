@@ -25,6 +25,24 @@ public class MyPersistentService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand: executed with startId: " + startId);
+        sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
+
+        if (intent != null) {
+//            if (intent.getAction().equals(ForegroundServiceConstants.ACTION_START))
+//                //TODO: Start Service
+//            else
+//                //TODO: Stop Service
+        } else {
+            Log.d("onStartCommand:", "Null intent detected"); //Intent is null if system restarts the service.
+        }
+
+        //If the service is killed. OS will restart this service if it's START_STICKY.
+        return START_STICKY;
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate: Service Created");
@@ -33,6 +51,16 @@ public class MyPersistentService extends Service {
         sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_RUNNING); //Editing the shared preferences
         Notification notification = createPersistentNotification(false, null);
         startForeground(ForegroundServiceConstants.DEF_NOTIFICATION_ID, notification);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy: Service Destroyed");
+        sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_STOPPED);
+
+        //TODO: Dispose all connections.
+
+        super.onDestroy();
     }
 
     /**
