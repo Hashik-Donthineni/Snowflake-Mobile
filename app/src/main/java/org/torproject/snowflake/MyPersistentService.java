@@ -13,12 +13,25 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
+import org.torproject.snowflake.interfaces.PeerConnectionObserverCallback;
+import org.webrtc.DataChannel;
+import org.webrtc.PeerConnection;
+import org.webrtc.PeerConnectionFactory;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Main Snowflake implementation of foreground service to relay data in the background.
  */
 public class MyPersistentService extends Service {
     private static final String TAG = "MyPersistentService";
+    //WebRTC vars
+    DataChannel mainDataChannel;
+    PeerConnection mainPeerConnection;
+    PeerConnectionFactory factory;
     private SharedPreferences sharedPreferences;
     private boolean isServiceStarted;
     private PowerManager.WakeLock wakeLock;
@@ -121,7 +134,7 @@ public class MyPersistentService extends Service {
         return builder.build();
     }
 
-    //Starting and stopping service
+    /////////////// Start/Stop Service ////////////////////////
 
     /**
      * Use to star/re-start the service
@@ -140,7 +153,7 @@ public class MyPersistentService extends Service {
         wakeLock.acquire(); //WakeLock acquired for unlimited amount of time.
 
         ///
-        //TODO: Start WebRTC connection.
+        startWebRTCConnection(); //Starting WebRTC
     }
 
     /**
@@ -160,5 +173,83 @@ public class MyPersistentService extends Service {
         isServiceStarted = false;
     }
 
+    /////////////// WebRTC ////////////////////////
+
+    /**
+     * Initializing and starting WebRTC connection.
+     */
+    private void startWebRTCConnection() {
+        initializePeerConnectionFactory(); //Android Specific, you can Ignore.
+        mainPeerConnection = createPeerConnection(factory); //Creating New Peer Connection.
+        //TODO: Fetch Offer from broker.
+    }
+
+    /**
+     * Initializing peer connection factory.
+     */
+    private void initializePeerConnectionFactory() {
+        Log.d(TAG, "initializePeerConnectionFactory: Started");
+        PeerConnectionFactory.InitializationOptions initializationOptions =
+                PeerConnectionFactory.InitializationOptions.builder(this)
+                        .createInitializationOptions();
+        PeerConnectionFactory.initialize(initializationOptions);
+
+        PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
+        factory = PeerConnectionFactory.builder()
+                .setOptions(options)
+                .createPeerConnectionFactory();
+        Log.d(TAG, "initializePeerConnectionFactory: Finished");
+    }
+
+    /**
+     * Creating a new peer connection.
+     *
+     * @param factory PeerConnectionFactory
+     * @return New PeerConnection
+     */
+    private PeerConnection createPeerConnection(PeerConnectionFactory factory) {
+        Log.d(TAG, "createPeerConnection: Creating a new peer connection");
+        List<PeerConnection.IceServer> iceServers = new LinkedList<>();
+//        iceServers.add(PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer()); To Add custom ICE servers.
+        PeerConnection.RTCConfiguration rtcConfiguration = new PeerConnection.RTCConfiguration(iceServers);
+        PeerConnection.Observer pcObserver = new MyPeerConnectionObserver(TAG, new PeerConnectionObserverCallback() {
+
+            @Override
+            public void onIceGatheringFinish() {
+                if (mainPeerConnection.connectionState() != PeerConnection.PeerConnectionState.CLOSED) {
+                    Log.d(TAG, "onIceGatheringFinish: Ice Gathering Finished. Sending Answer to broker...\n" + mainPeerConnection.getLocalDescription().description);
+                    //Sending the SDP Answer to the server.
+                    //TODO:Send Answer
+                }
+            }
+
+            @Override
+            public void onMessage(DataChannel.Buffer buffer) {
+                //Relay it to WebSocket
+                ByteBuffer data = ByteBuffer.wrap("HELLO".getBytes(Charset.defaultCharset())); //Sending some temporary data to test.
+                mainDataChannel.send(new DataChannel.Buffer(data, false));
+            }
+
+            @Override
+            public void onDataChannel(DataChannel dataChannel) {
+                Log.d(TAG, "onDataChannel: Setting Data Channel");
+                mainDataChannel = dataChannel;
+            }
+
+            @Override
+            public void iceConnectionFailed() {
+                Log.d(TAG, "iceConnectionFailed: ");
+                //Figuring out with trac ticket.
+            }
+
+            @Override
+            public void dataChannelStateChange(final DataChannel.State STATE) {
+                Log.d(TAG, "dataChannelStateChange: Data Channel State: " + STATE);
+            }
+        });
+
+        Log.d(TAG, "createPeerConnection: Finished creating peer connection.");
+        return factory.createPeerConnection(rtcConfiguration, pcObserver);
+    }
     /////////////////////////////////////
 }
