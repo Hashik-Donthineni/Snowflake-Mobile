@@ -195,7 +195,7 @@ public class MyPersistentService extends Service {
     private void startWebRTCConnection() {
         initializePeerConnectionFactory(); //Android Specific, you can Ignore.
         mainPeerConnection = createPeerConnection(factory); //Creating New Peer Connection.
-        //TODO: Fetch offer from broker
+        fetchOffer();
     }
 
     /**
@@ -312,7 +312,6 @@ public class MyPersistentService extends Service {
      */
     public void offerRequestFailure(Throwable t) {
         Log.d(TAG, "requestFailure: " + t.getMessage());
-        createPersistentNotification(true, "Failed getting offer. Retrying.");
         //TODO:Set a time out to resending offer.
         if (isServiceStarted)
             fetchOffer(); //Sending request for offer again.
