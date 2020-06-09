@@ -266,6 +266,7 @@ public class MyPersistentService extends Service {
         return factory.createPeerConnection(rtcConfiguration, pcObserver);
     }
     /////////////// Network Calls ////////////////////////
+
     /**
      * Sending post request to get offer from the broker.
      */
@@ -280,24 +281,40 @@ public class MyPersistentService extends Service {
 
     /**
      * Fetching offer is a success.
+     *
      * @param sdpOfferResponse
      */
     public void offerRequestSuccess(SDPOfferResponse sdpOfferResponse) {
+        createPersistentNotification(true, "Fetching offer success. Creating Answer.");
         if (sdpOfferResponse.getStatus().equals(BrokerConstants.CLIENT_MATCH)) {
             Log.d(TAG, "requestSuccess: CLIENT MATCH");
-            //TODO:Serialize SDP, SetRemote Description, Send Answer.
-
+            try {
+                SessionDescription offer = SDPSerializer.deserializeOffer(sdpOfferResponse.getOffer());
+                Log.d(TAG, "requestSuccess: Remote Description (OFFER):\n" + offer.description);
+                mainPeerConnection.setRemoteDescription(new SimpleSdpObserver("Remote: Offer"), offer);
+                //TODO: Create Answer
+            } catch (JSONException e) {
+                Log.d(TAG, "requestSuccess: Serialization Failed:");
+                e.printStackTrace();
+            }
         } else {
             Log.d(TAG, "requestSuccess: NO CLIENT MATCH");
-//            if (isServiceStarted)
-            //fetchOffer(); //Sending request for offer again.
+            //TODO:Set a time out to resending offer.
+            if (isServiceStarted)
+                fetchOffer(); //Sending request for offer again.
         }
     }
 
-    public void offerRequestFailure(Throwable t){
+    /**
+     * Offer Request is a failure and handling the failure by resending the offer.
+     *
+     * @param t
+     */
+    public void offerRequestFailure(Throwable t) {
         Log.d(TAG, "requestFailure: " + t.getMessage());
-        createPersistentNotification(true,"Failed getting offer. Retrying.");
+        createPersistentNotification(true, "Failed getting offer. Retrying.");
         //TODO:Set a time out to resending offer.
-        fetchOffer(); //Sending request for offer again.
+        if (isServiceStarted)
+            fetchOffer(); //Sending request for offer again.
     }
 }
