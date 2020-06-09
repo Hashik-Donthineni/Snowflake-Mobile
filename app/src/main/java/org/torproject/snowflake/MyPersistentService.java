@@ -299,7 +299,9 @@ public class MyPersistentService extends Service {
         final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
         Observable<SDPOfferResponse> offer = getOfferService.getOffer(new OfferRequestBody("555")); //TODO:Randomly Generate SID.
         serviceDisposable = offer.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(this::offerRequestSuccess, this::offerRequestFailure);
+                .delaySubscription(5000, TimeUnit.MILLISECONDS) //Delay of 5 seconds before sending request to avoid sending too many requests in case of a failure.
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::offerRequestSuccess, this::offerRequestFailure);
     }
 
     /**
@@ -324,7 +326,6 @@ public class MyPersistentService extends Service {
         } else {
             updateNotification("No client match, retrying...");
             Log.d(TAG, "requestSuccess: NO CLIENT MATCH");
-            //TODO:Set a time out (delay) to resending offer.
             if (isServiceStarted)
                 fetchOffer(); //Sending request for offer again.
         }
@@ -338,7 +339,6 @@ public class MyPersistentService extends Service {
     public void offerRequestFailure(Throwable t) {
         updateNotification("Request failed, retrying...");
         Log.d(TAG, "requestFailure: " + t.getMessage());
-        //TODO:Set a time out (delay) to resending offer.
         if (isServiceStarted)
             fetchOffer(); //Sending request for offer again.
     }
