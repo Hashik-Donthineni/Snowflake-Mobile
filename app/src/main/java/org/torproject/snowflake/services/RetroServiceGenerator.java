@@ -21,7 +21,7 @@ public class RetroServiceGenerator {
 
         OkHttpClient.Builder httpClient =
                 new OkHttpClient.Builder();
-
+        //TODO:Set Custom Time Out (Long Polling)
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
             interceptor.level(HttpLoggingInterceptor.Level.BODY);

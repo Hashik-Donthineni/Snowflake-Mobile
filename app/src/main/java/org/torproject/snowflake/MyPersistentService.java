@@ -18,11 +18,16 @@ import org.json.JSONException;
 import org.torproject.snowflake.constants.BrokerConstants;
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 import org.torproject.snowflake.interfaces.PeerConnectionObserverCallback;
+import org.torproject.snowflake.pojo.AnsResponse;
+import org.torproject.snowflake.pojo.AnswerBody;
+import org.torproject.snowflake.pojo.AnswerBodySDP;
 import org.torproject.snowflake.pojo.OfferRequestBody;
 import org.torproject.snowflake.pojo.SDPOfferResponse;
 import org.torproject.snowflake.services.GetOfferService;
 import org.torproject.snowflake.services.RetroServiceGenerator;
+import org.torproject.snowflake.services.SendAnswerService;
 import org.webrtc.DataChannel;
+import org.webrtc.MediaConstraints;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SessionDescription;
@@ -209,7 +214,6 @@ public class MyPersistentService extends Service {
             Log.d(TAG, "stopService: Failed with: " + e.getMessage());
         }
     }
-
     /////////////// WebRTC ////////////////////////
 
     /**
@@ -255,8 +259,8 @@ public class MyPersistentService extends Service {
             public void onIceGatheringFinish() {
                 if (mainPeerConnection.connectionState() != PeerConnection.PeerConnectionState.CLOSED) {
                     Log.d(TAG, "onIceGatheringFinish: Ice Gathering Finished. Sending Answer to broker...\n" + mainPeerConnection.getLocalDescription().description);
-                    //Sending the SDP Answer to the server.
-                    //TODO:Send Answer
+                    //Ice gathering finished. Sending the SDP Answer to the server.
+                    sendAnswer(mainPeerConnection.getLocalDescription());
                 }
             }
 
@@ -282,12 +286,37 @@ public class MyPersistentService extends Service {
             @Override
             public void dataChannelStateChange(final DataChannel.State STATE) {
                 Log.d(TAG, "dataChannelStateChange: Data Channel State: " + STATE);
+                if(STATE == DataChannel.State.OPEN){
+                    updateNotification("Connection Established. Serving one client.");
+                }
             }
         });
 
         Log.d(TAG, "createPeerConnection: Finished creating peer connection.");
         return factory.createPeerConnection(rtcConfiguration, pcObserver);
     }
+
+    /**
+     * Create SDP answer to send it to broker.
+     */
+    private void createAnswer() {
+        Log.d(TAG, "createAnswer: Starting Creating Answer...");
+        //CreateAnswer fires the request to get ICE candidates and finish the SDP. We can listen to all these events on the corresponding observers.
+        mainPeerConnection.createAnswer(new SimpleSdpObserver("Local: Answer") {
+            @Override
+            public void onCreateSuccess(SessionDescription sessionDescription) {
+                mainPeerConnection.setLocalDescription(new SimpleSdpObserver("Local"), sessionDescription);
+                //Wait till ICE Gathering/ Trickling is finished to send the answer.
+            }
+
+            @Override
+            public void onCreateFailure(String s) {
+                Log.e(TAG, "onCreateFailure: FAILED:" + s);
+            }
+        }, new MediaConstraints());
+        updateNotification("Answer creation finished, establishing connection...");
+    }
+
     /////////////// Network Calls ////////////////////////
 
     /**
@@ -318,7 +347,7 @@ public class MyPersistentService extends Service {
                 SessionDescription offer = SDPSerializer.deserializeOffer(sdpOfferResponse.getOffer());
                 Log.d(TAG, "requestSuccess: Remote Description (OFFER):\n" + offer.description);
                 mainPeerConnection.setRemoteDescription(new SimpleSdpObserver("Remote: Offer"), offer);
-                //TODO: Create Answer
+                createAnswer();
             } catch (JSONException e) {
                 Log.d(TAG, "requestSuccess: Serialization Failed:");
                 e.printStackTrace();
@@ -341,5 +370,53 @@ public class MyPersistentService extends Service {
         Log.d(TAG, "requestFailure: " + t.getMessage());
         if (isServiceStarted)
             fetchOffer(); //Sending request for offer again.
+    }
+
+    /**
+     * Sending answer to the broker.
+     */
+    public void sendAnswer(SessionDescription sessionDescription) {
+        Log.d(TAG, "sendAnswer: Sending SDP Answer");
+        AnswerBodySDP bodySDP = new AnswerBodySDP();
+        bodySDP.setSdp(SDPSerializer.serializeAnswer(sessionDescription));
+        AnswerBody body = new AnswerBody("555", bodySDP.toString()); //TODO:Use randomly Generate SID from sendRequest
+        SendAnswerService service = RetroServiceGenerator.createService(SendAnswerService.class);
+        Observable<AnsResponse> response = service.sendAnswer(body);
+        serviceDisposable = response.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(this::answerResponseSuccess, this::answerResponseFailure);
+    }
+
+    /**
+     * Sending answer to broker succeeded
+     *
+     * @param ansResponse
+     */
+    private void answerResponseSuccess(AnsResponse ansResponse) {
+        if (ansResponse.getStatus().equals(BrokerConstants.CLIENT_GONE)) {
+            Log.d(TAG, "answerResponseSuccess: Client Gone");
+            closeConnectionAndResend();
+        } else {
+            Log.d(TAG, "answerResponseSuccess: Sending Success");
+        }
+    }
+
+    /**
+     * Sending answer to broker failed.
+     *
+     * @param throwable
+     */
+    private void answerResponseFailure(Throwable throwable) {
+        Log.e(TAG, "answerResponseFailure: " + throwable.getMessage());
+    }
+
+    /**
+     * Closing the connection and resending the request to get SDP.
+     */
+    private void closeConnectionAndResend() {
+        Log.d(TAG, "closeConnectionAndResend: Closing connection and resending request.");
+        //Closing both to avoid memory leak.
+        mainDataChannel.close();
+        mainPeerConnection.close();
+        fetchOffer(); //Sending request for offer again.
     }
 }
