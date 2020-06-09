@@ -12,13 +12,18 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import org.json.JSONException;
+import org.torproject.snowflake.constants.BrokerConstants;
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 import org.torproject.snowflake.interfaces.PeerConnectionObserverCallback;
 import org.torproject.snowflake.pojo.OfferRequestBody;
 import org.torproject.snowflake.pojo.SDPOfferResponse;
+import org.torproject.snowflake.services.GetOfferService;
+import org.torproject.snowflake.services.RetroServiceGenerator;
 import org.webrtc.DataChannel;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
+import org.webrtc.SessionDescription;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -27,6 +32,7 @@ import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
@@ -41,6 +47,8 @@ public class MyPersistentService extends Service {
     private SharedPreferences sharedPreferences;
     private boolean isServiceStarted;
     private PowerManager.WakeLock wakeLock;
+    private Disposable serviceDisposable;
+
 
     @Nullable
     @Override
@@ -258,4 +266,38 @@ public class MyPersistentService extends Service {
         return factory.createPeerConnection(rtcConfiguration, pcObserver);
     }
     /////////////// Network Calls ////////////////////////
+    /**
+     * Sending post request to get offer from the broker.
+     */
+    private void fetchOffer() {
+        Log.d(TAG, "fetchOffer: Fetching offer from broker.");
+        ///Retrofit call
+        final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
+        Observable<SDPOfferResponse> offer = getOfferService.getOffer(new OfferRequestBody("555"));
+        serviceDisposable = offer.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(this::offerRequestSuccess, this::offerRequestFailure);
+    }
+
+    /**
+     * Fetching offer is a success.
+     * @param sdpOfferResponse
+     */
+    public void offerRequestSuccess(SDPOfferResponse sdpOfferResponse) {
+        if (sdpOfferResponse.getStatus().equals(BrokerConstants.CLIENT_MATCH)) {
+            Log.d(TAG, "requestSuccess: CLIENT MATCH");
+            //TODO:Serialize SDP, SetRemote Description, Send Answer.
+
+        } else {
+            Log.d(TAG, "requestSuccess: NO CLIENT MATCH");
+//            if (isServiceStarted)
+            //fetchOffer(); //Sending request for offer again.
+        }
+    }
+
+    public void offerRequestFailure(Throwable t){
+        Log.d(TAG, "requestFailure: " + t.getMessage());
+        createPersistentNotification(true,"Failed getting offer. Retrying.");
+        //TODO:Set a time out to resending offer.
+        fetchOffer(); //Sending request for offer again.
+    }
 }
