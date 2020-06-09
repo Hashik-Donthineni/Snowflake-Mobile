@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
             NotificationChannel channel = new NotificationChannel(ForegroundServiceConstants.NOTIFICATION_CHANNEL_ID,
                     getString(R.string.not_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH);
+                    NotificationManager.IMPORTANCE_LOW);
             channel.setDescription(getString(R.string.not_channel_desc));
             channel.enableLights(true);
             channel.setLightColor(Color.RED);
