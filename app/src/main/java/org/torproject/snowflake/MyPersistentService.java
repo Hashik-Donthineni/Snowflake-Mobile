@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
@@ -50,6 +51,7 @@ public class MyPersistentService extends Service {
     private boolean isServiceStarted;
     private PowerManager.WakeLock wakeLock;
     private Disposable serviceDisposable;
+    private NotificationManager mNotificationManager;
 
 
     @Nullable
@@ -62,6 +64,7 @@ public class MyPersistentService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: executed with startId: " + startId);
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
+        isServiceStarted = sharedPreferences.getBoolean(getString(R.string.is_service_running_bool), false);
 
         if (intent != null) {
             if (intent.getAction().equals(ForegroundServiceConstants.ACTION_START))
@@ -82,19 +85,27 @@ public class MyPersistentService extends Service {
         super.onCreate();
         Log.d(TAG, "onCreate: Service Created");
 
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE); //Assigning the shared preferences
-        sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_RUNNING); //Editing the shared preferences
         Notification notification = createPersistentNotification(false, null);
         startForeground(ForegroundServiceConstants.DEF_NOTIFICATION_ID, notification);
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy: Service Destroyed");
         sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_STOPPED);
+        if (serviceDisposable != null)
+            serviceDisposable.dispose(); //Stopping the network request if it's running.
+        if (mainDataChannel != null) {
+            mainDataChannel.close();
+        }
+        if (mainPeerConnection != null) {
+            mainPeerConnection.close();
+            mainPeerConnection.dispose();
+        }
 
-        //TODO: Dispose all connections.
-
+        mNotificationManager.cancel(ForegroundServiceConstants.DEF_NOTIFICATION_ID);
+        Log.d(TAG, "onDestroy: Service Destroyed");
         super.onDestroy();
     }
 
@@ -108,8 +119,10 @@ public class MyPersistentService extends Service {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         if (setState == ForegroundServiceConstants.SERVICE_RUNNING) {
+            isServiceStarted = true;
             editor.putBoolean(getString(R.string.is_service_running_bool), true);
         } else {
+            isServiceStarted = false;
             editor.putBoolean(getString(R.string.is_service_running_bool), false);
         }
         editor.apply();
@@ -121,8 +134,6 @@ public class MyPersistentService extends Service {
      */
     private void updateNotification(String updateText) {
         Notification notification = createPersistentNotification(true, updateText); //Create a new notification.
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(ForegroundServiceConstants.DEF_NOTIFICATION_ID, notification);
     }
 
@@ -172,8 +183,8 @@ public class MyPersistentService extends Service {
             return;
         }
         Log.d(TAG, "startService: Starting foreground service");
-        isServiceStarted = true;
 
+        sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_RUNNING); //Editing the shared preferences
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "MyApp::MyWakelockTag");
@@ -197,7 +208,6 @@ public class MyPersistentService extends Service {
         } catch (Exception e) {
             Log.d(TAG, "stopService: Failed with: " + e.getMessage());
         }
-        isServiceStarted = false;
     }
 
     /////////////// WebRTC ////////////////////////
@@ -298,8 +308,9 @@ public class MyPersistentService extends Service {
      * @param sdpOfferResponse
      */
     public void offerRequestSuccess(SDPOfferResponse sdpOfferResponse) {
-        createPersistentNotification(true, "Fetching offer success. Creating Answer.");
+        updateNotification("Fetching offer success. Creating Answer.");
         if (sdpOfferResponse.getStatus().equals(BrokerConstants.CLIENT_MATCH)) {
+            updateNotification("Client match, generating answer...");
             Log.d(TAG, "requestSuccess: CLIENT MATCH");
             try {
                 SessionDescription offer = SDPSerializer.deserializeOffer(sdpOfferResponse.getOffer());
