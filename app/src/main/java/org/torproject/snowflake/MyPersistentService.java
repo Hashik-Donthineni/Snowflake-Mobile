@@ -1,8 +1,10 @@
 package org.torproject.snowflake;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -111,6 +113,17 @@ public class MyPersistentService extends Service {
             editor.putBoolean(getString(R.string.is_service_running_bool), false);
         }
         editor.apply();
+    }
+    /////////////// Notifications ////////////////////////
+
+    /**
+     * Method that can be called to update the Notification
+     */
+    private void updateNotification(String updateText) {
+        Notification notification = createPersistentNotification(true, updateText); //Create a new notification.
+
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(ForegroundServiceConstants.DEF_NOTIFICATION_ID, notification);
     }
 
     /**
@@ -274,7 +287,7 @@ public class MyPersistentService extends Service {
         Log.d(TAG, "fetchOffer: Fetching offer from broker.");
         ///Retrofit call
         final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
-        Observable<SDPOfferResponse> offer = getOfferService.getOffer(new OfferRequestBody("555"));
+        Observable<SDPOfferResponse> offer = getOfferService.getOffer(new OfferRequestBody("555")); //TODO:Randomly Generate SID.
         serviceDisposable = offer.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(this::offerRequestSuccess, this::offerRequestFailure);
     }
@@ -298,8 +311,9 @@ public class MyPersistentService extends Service {
                 e.printStackTrace();
             }
         } else {
+            updateNotification("No client match, retrying...");
             Log.d(TAG, "requestSuccess: NO CLIENT MATCH");
-            //TODO:Set a time out to resending offer.
+            //TODO:Set a time out (delay) to resending offer.
             if (isServiceStarted)
                 fetchOffer(); //Sending request for offer again.
         }
@@ -311,8 +325,9 @@ public class MyPersistentService extends Service {
      * @param t
      */
     public void offerRequestFailure(Throwable t) {
+        updateNotification("Request failed, retrying...");
         Log.d(TAG, "requestFailure: " + t.getMessage());
-        //TODO:Set a time out to resending offer.
+        //TODO:Set a time out (delay) to resending offer.
         if (isServiceStarted)
             fetchOffer(); //Sending request for offer again.
     }
