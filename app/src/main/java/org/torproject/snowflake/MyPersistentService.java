@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 import org.torproject.snowflake.interfaces.PeerConnectionObserverCallback;
+import org.torproject.snowflake.pojo.OfferRequestBody;
+import org.torproject.snowflake.pojo.SDPOfferResponse;
 import org.webrtc.DataChannel;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
@@ -22,6 +24,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Main Snowflake implementation of foreground service to relay data in the background.
@@ -181,7 +187,7 @@ public class MyPersistentService extends Service {
     private void startWebRTCConnection() {
         initializePeerConnectionFactory(); //Android Specific, you can Ignore.
         mainPeerConnection = createPeerConnection(factory); //Creating New Peer Connection.
-        //TODO: Fetch Offer from broker.
+        //TODO: Fetch offer from broker
     }
 
     /**
@@ -239,7 +245,7 @@ public class MyPersistentService extends Service {
             @Override
             public void iceConnectionFailed() {
                 Log.d(TAG, "iceConnectionFailed: ");
-                //Figuring out with trac ticket.
+                //TODO: Figuring out with trac ticket.
             }
 
             @Override
@@ -251,5 +257,5 @@ public class MyPersistentService extends Service {
         Log.d(TAG, "createPeerConnection: Finished creating peer connection.");
         return factory.createPeerConnection(rtcConfiguration, pcObserver);
     }
-    /////////////////////////////////////
+    /////////////// Network Calls ////////////////////////
 }
