@@ -194,7 +194,7 @@ public class MyPersistentService extends Service {
         sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_RUNNING); //Editing the shared preferences
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyApp::MyWakelockTag");
+                "Snowflake::MyPersistentService");
         wakeLock.acquire(); //WakeLock acquired for unlimited amount of time.
 
         ///
