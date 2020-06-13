@@ -192,7 +192,7 @@ public class MyPersistentService extends Service {
         sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_RUNNING); //Editing the shared preferences
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyApp::MyWakelockTag");
+                "Snowflake::MyPersistentService");
         wakeLock.acquire(); //WakeLock acquired for unlimited amount of time.
 
         ///
@@ -286,7 +286,7 @@ public class MyPersistentService extends Service {
             @Override
             public void dataChannelStateChange(final DataChannel.State STATE) {
                 Log.d(TAG, "dataChannelStateChange: Data Channel State: " + STATE);
-                if(STATE == DataChannel.State.OPEN){
+                if (STATE == DataChannel.State.OPEN) {
                     updateNotification("Connection Established. Serving one client.");
                 }
             }
