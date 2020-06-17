@@ -328,7 +328,7 @@ public class MyPersistentService extends Service {
         final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
         Observable<SDPOfferResponse> offer = getOfferService.getOffer(GlobalApplication.getHeadersMap(), new OfferRequestBody("555")); //TODO:Randomly Generate SID.
         serviceDisposable = offer.subscribeOn(Schedulers.io())
-                .delaySubscription(5000, TimeUnit.MILLISECONDS) //Delay of 5 seconds before sending request to avoid sending too many requests in case of a failure.
+                .delaySubscription(5, TimeUnit.SECONDS) //Delay of 5 seconds before sending request to avoid sending too many requests in case of a failure.
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::offerRequestSuccess, this::offerRequestFailure);
     }
