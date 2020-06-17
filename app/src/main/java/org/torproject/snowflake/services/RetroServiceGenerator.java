@@ -3,6 +3,8 @@ package org.torproject.snowflake.services;
 import org.torproject.snowflake.BuildConfig;
 import org.torproject.snowflake.GlobalApplication;
 
+import java.util.concurrent.TimeUnit;
+
 import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -21,7 +23,9 @@ public class RetroServiceGenerator {
 
         OkHttpClient.Builder httpClient =
                 new OkHttpClient.Builder();
-        //TODO:Set Custom Time Out (Long Polling)
+        //Setting a custom timeouts.
+        httpClient.readTimeout(15, TimeUnit.SECONDS);
+
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
             interceptor.level(HttpLoggingInterceptor.Level.BODY);
