@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
@@ -55,9 +55,9 @@ public class MyPersistentService extends Service {
     private SharedPreferences sharedPreferences;
     private boolean isServiceStarted;
     private PowerManager.WakeLock wakeLock;
-    private Disposable serviceDisposable;
+    private CompositeDisposable compositeDisposable;
     private NotificationManager mNotificationManager;
-
+    private boolean isConnectionAlive;
 
     @Nullable
     @Override
@@ -91,6 +91,8 @@ public class MyPersistentService extends Service {
         Log.d(TAG, "onCreate: Service Created");
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        isConnectionAlive = false;
+        compositeDisposable = new CompositeDisposable();
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE); //Assigning the shared preferences
         Notification notification = createPersistentNotification(false, null);
         startForeground(ForegroundServiceConstants.DEF_NOTIFICATION_ID, notification);
@@ -99,8 +101,8 @@ public class MyPersistentService extends Service {
     @Override
     public void onDestroy() {
         sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_STOPPED);
-        if (serviceDisposable != null)
-            serviceDisposable.dispose(); //Stopping the network request if it's running.
+        if (compositeDisposable != null)
+            compositeDisposable.dispose(); //Disposing all the threads. Including network calls.
         if (mainDataChannel != null) {
             mainDataChannel.close();
         }
@@ -220,9 +222,18 @@ public class MyPersistentService extends Service {
      * Initializing and starting WebRTC connection.
      */
     private void startWebRTCConnection() {
+        Log.d(TAG, "startWebRTCConnection: Starting Connection.");
         initializePeerConnectionFactory(); //Android Specific, you can Ignore.
         mainPeerConnection = createPeerConnection(factory); //Creating New Peer Connection.
-        fetchOffer();
+        compositeDisposable.add(
+                //First argument is initialDelay, Second argument is the time after which it has to repeat.
+                Observable.interval(1, 5, TimeUnit.SECONDS)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(aLong -> {
+                            fetchOffer(); //This runs on main thread.
+                        })
+        );
     }
 
     /**
@@ -323,14 +334,19 @@ public class MyPersistentService extends Service {
      * Sending post request to get offer from the broker.
      */
     private void fetchOffer() {
-        Log.d(TAG, "fetchOffer: Fetching offer from broker.");
-        ///Retrofit call
-        final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
-        Observable<SDPOfferResponse> offer = getOfferService.getOffer(GlobalApplication.getHeadersMap(), new OfferRequestBody("555")); //TODO:Randomly Generate SID.
-        serviceDisposable = offer.subscribeOn(Schedulers.io())
-                .delaySubscription(5, TimeUnit.SECONDS) //Delay of 5 seconds before sending request to avoid sending too many requests in case of a failure.
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::offerRequestSuccess, this::offerRequestFailure);
+        //Fetch offer only when the connection is not alive/active and only when the service is on.
+        if (isServiceStarted && !isConnectionAlive) {
+            isConnectionAlive = true; //Considering connection is alive from now on, until it is set to false.
+            Log.d(TAG, "fetchOffer: Fetching offer from broker.");
+            ///Retrofit call
+            final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
+            Observable<SDPOfferResponse> offer = getOfferService.getOffer(GlobalApplication.getHeadersMap(), new OfferRequestBody("555")); //TODO:Randomly Generate SID.
+            compositeDisposable.add(
+                    offer.subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::offerRequestSuccess, this::offerRequestFailure)
+            );
+        }
     }
 
     /**
@@ -355,8 +371,7 @@ public class MyPersistentService extends Service {
         } else {
             updateNotification("No client match, retrying...");
             Log.d(TAG, "requestSuccess: NO CLIENT MATCH");
-            if (isServiceStarted)
-                fetchOffer(); //Sending request for offer again.
+            isConnectionAlive = false;
         }
     }
 
@@ -368,8 +383,7 @@ public class MyPersistentService extends Service {
     public void offerRequestFailure(Throwable t) {
         updateNotification("Request failed, retrying...");
         Log.d(TAG, "requestFailure: " + t.getMessage());
-        if (isServiceStarted)
-            fetchOffer(); //Sending request for offer again.
+        isConnectionAlive = false;
     }
 
     /**
@@ -382,8 +396,10 @@ public class MyPersistentService extends Service {
         AnswerBody body = new AnswerBody("555", bodySDP.toString()); //TODO:Use randomly Generate SID from sendRequest
         SendAnswerService service = RetroServiceGenerator.createService(SendAnswerService.class);
         Observable<AnsResponse> response = service.sendAnswer(GlobalApplication.getHeadersMap(), body);
-        serviceDisposable = response.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(this::answerResponseSuccess, this::answerResponseFailure);
+        compositeDisposable.add(
+                response.subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe(this::answerResponseSuccess, this::answerResponseFailure)
+        );
     }
 
     /**
@@ -407,6 +423,7 @@ public class MyPersistentService extends Service {
      */
     private void answerResponseFailure(Throwable throwable) {
         Log.e(TAG, "answerResponseFailure: " + throwable.getMessage());
+        isConnectionAlive = false;
     }
 
     /**
@@ -417,6 +434,6 @@ public class MyPersistentService extends Service {
         //Closing both to avoid memory leak.
         mainDataChannel.close();
         mainPeerConnection.close();
-        fetchOffer(); //Sending request for offer again.
+        isConnectionAlive = false;
     }
 }
