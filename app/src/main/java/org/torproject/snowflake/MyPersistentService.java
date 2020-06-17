@@ -286,7 +286,7 @@ public class MyPersistentService extends Service {
             @Override
             public void dataChannelStateChange(final DataChannel.State STATE) {
                 Log.d(TAG, "dataChannelStateChange: Data Channel State: " + STATE);
-                if(STATE == DataChannel.State.OPEN){
+                if (STATE == DataChannel.State.OPEN) {
                     updateNotification("Connection Established. Serving one client.");
                 }
             }
@@ -326,7 +326,7 @@ public class MyPersistentService extends Service {
         Log.d(TAG, "fetchOffer: Fetching offer from broker.");
         ///Retrofit call
         final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
-        Observable<SDPOfferResponse> offer = getOfferService.getOffer(new OfferRequestBody("555")); //TODO:Randomly Generate SID.
+        Observable<SDPOfferResponse> offer = getOfferService.getOffer(GlobalApplication.getHeadersMap(), new OfferRequestBody("555")); //TODO:Randomly Generate SID.
         serviceDisposable = offer.subscribeOn(Schedulers.io())
                 .delaySubscription(5000, TimeUnit.MILLISECONDS) //Delay of 5 seconds before sending request to avoid sending too many requests in case of a failure.
                 .observeOn(AndroidSchedulers.mainThread())
@@ -381,7 +381,7 @@ public class MyPersistentService extends Service {
         bodySDP.setSdp(SDPSerializer.serializeAnswer(sessionDescription));
         AnswerBody body = new AnswerBody("555", bodySDP.toString()); //TODO:Use randomly Generate SID from sendRequest
         SendAnswerService service = RetroServiceGenerator.createService(SendAnswerService.class);
-        Observable<AnsResponse> response = service.sendAnswer(body);
+        Observable<AnsResponse> response = service.sendAnswer(GlobalApplication.getHeadersMap(), body);
         serviceDisposable = response.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(this::answerResponseSuccess, this::answerResponseFailure);
     }
