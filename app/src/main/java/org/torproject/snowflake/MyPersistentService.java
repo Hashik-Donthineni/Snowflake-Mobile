@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import org.json.JSONException;
 import org.torproject.snowflake.constants.BrokerConstants;
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
+import org.torproject.snowflake.exceptions.EmptySIDException;
 import org.torproject.snowflake.interfaces.PeerConnectionObserverCallback;
 import org.torproject.snowflake.pojo.AnsResponse;
 import org.torproject.snowflake.pojo.AnswerBody;
@@ -58,6 +59,7 @@ public class MyPersistentService extends Service {
     private CompositeDisposable compositeDisposable;
     private NotificationManager mNotificationManager;
     private boolean isConnectionAlive;
+    private SIDHelper sidHelper;
 
     @Nullable
     @Override
@@ -92,6 +94,7 @@ public class MyPersistentService extends Service {
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         isConnectionAlive = false;
+        sidHelper = SIDHelper.getInstance();
         compositeDisposable = new CompositeDisposable();
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE); //Assigning the shared preferences
         Notification notification = createPersistentNotification(false, null);
@@ -340,7 +343,7 @@ public class MyPersistentService extends Service {
             Log.d(TAG, "fetchOffer: Fetching offer from broker.");
             ///Retrofit call
             final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
-            Observable<SDPOfferResponse> offer = getOfferService.getOffer(GlobalApplication.getHeadersMap(), new OfferRequestBody("555")); //TODO:Randomly Generate SID.
+            Observable<SDPOfferResponse> offer = getOfferService.getOffer(GlobalApplication.getHeadersMap(), new OfferRequestBody(sidHelper.generateSid()));
             compositeDisposable.add(
                     offer.subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -391,15 +394,20 @@ public class MyPersistentService extends Service {
      */
     public void sendAnswer(SessionDescription sessionDescription) {
         Log.d(TAG, "sendAnswer: Sending SDP Answer");
-        AnswerBodySDP bodySDP = new AnswerBodySDP();
-        bodySDP.setSdp(SDPSerializer.serializeAnswer(sessionDescription));
-        AnswerBody body = new AnswerBody("555", bodySDP.toString()); //TODO:Use randomly Generate SID from sendRequest
-        SendAnswerService service = RetroServiceGenerator.createService(SendAnswerService.class);
-        Observable<AnsResponse> response = service.sendAnswer(GlobalApplication.getHeadersMap(), body);
-        compositeDisposable.add(
-                response.subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()).subscribe(this::answerResponseSuccess, this::answerResponseFailure)
-        );
+        try {
+            AnswerBodySDP bodySDP = new AnswerBodySDP();
+            bodySDP.setSdp(SDPSerializer.serializeAnswer(sessionDescription));
+            AnswerBody body = new AnswerBody(sidHelper.getSid(), bodySDP.toString());
+            SendAnswerService service = RetroServiceGenerator.createService(SendAnswerService.class);
+            Observable<AnsResponse> response = service.sendAnswer(GlobalApplication.getHeadersMap(), body);
+            compositeDisposable.add(
+                    response.subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread()).subscribe(this::answerResponseSuccess, this::answerResponseFailure)
+            );
+        } catch (EmptySIDException e) {
+            Log.e(TAG, "sendAnswer: getSid() is called before sid generation");
+            e.printStackTrace();
+        }
     }
 
     /**
