@@ -297,8 +297,12 @@ public class MyPersistentService extends Service {
             @Override
             public void dataChannelStateChange(final DataChannel.State STATE) {
                 Log.d(TAG, "dataChannelStateChange: Data Channel State: " + STATE);
+
                 if (STATE == DataChannel.State.OPEN) {
                     updateNotification("Connection Established. Serving one client.");
+                } else if (STATE == DataChannel.State.CLOSED) {
+                    updateNotification("Connection is closed. Resending offer...");
+                    closeConnectionAndResend();
                 }
             }
         });
