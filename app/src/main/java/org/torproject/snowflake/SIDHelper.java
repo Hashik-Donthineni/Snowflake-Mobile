@@ -1,5 +1,7 @@
 package org.torproject.snowflake;
 
+import android.util.Log;
+
 import org.torproject.snowflake.exceptions.EmptySIDException;
 
 import java.util.Random;
@@ -28,7 +30,7 @@ public class SIDHelper {
      * @return generated sid.
      */
     public String generateSid() {
-        sid = Integer.toString(new Random().nextInt(10000));
+        sid = Integer.toString(new Random().nextInt(), 64).substring(2);
         return sid;
     }
 
