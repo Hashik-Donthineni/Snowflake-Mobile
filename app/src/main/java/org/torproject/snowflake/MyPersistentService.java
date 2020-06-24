@@ -14,6 +14,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.torproject.snowflake.constants.BrokerConstants;
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
@@ -43,6 +44,12 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okio.ByteString;
 
 /**
  * Main Snowflake implementation of foreground service to relay data in the background.
@@ -60,6 +67,7 @@ public class MyPersistentService extends Service {
     private NotificationManager mNotificationManager;
     private boolean isConnectionAlive;
     private SIDHelper sidHelper;
+    private WebSocket webSocket;
 
     @Nullable
     @Override
@@ -447,5 +455,45 @@ public class MyPersistentService extends Service {
         mainDataChannel.close();
         mainPeerConnection.close();
         isConnectionAlive = false;
+    }
+
+    /////////////// Web Socket ////////////////////////
+
+    private void startWebSocket() {
+        OkHttpClient client = new OkHttpClient();
+        webSocket = client.newWebSocket(new Request.Builder().url(GlobalApplication.getBrokerUrl()).build()
+                , new WebSocketListener() {
+                    @Override
+                    public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                        Log.d(TAG, "WebSocketListener: onClosed: ");
+                    }
+
+                    @Override
+                    public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                        Log.d(TAG, "WebSocketListener: onClosing: ");
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @org.jetbrains.annotations.Nullable Response response) {
+                        Log.d(TAG, "WebSocketListener: onFailure: ");
+                    }
+
+                    @Override
+                    public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
+                        Log.d(TAG, "WebSocketListener: onMessage: ");
+                    }
+
+                    @Override
+                    public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
+                        Log.d(TAG, "WebSocketListener: onMessage: ");
+                    }
+
+                    @Override
+                    public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
+                        Log.d(TAG, "WebSocketListener: onOpen: ");
+                    }
+                });
+
+        client.dispatcher().executorService().shutdown();
     }
 }
