@@ -25,6 +25,8 @@ import org.torproject.snowflake.pojo.AnswerBody;
 import org.torproject.snowflake.pojo.AnswerBodySDP;
 import org.torproject.snowflake.pojo.OfferRequestBody;
 import org.torproject.snowflake.pojo.SDPOfferResponse;
+import org.torproject.snowflake.serialization.RelaySerialization;
+import org.torproject.snowflake.serialization.SDPSerializer;
 import org.torproject.snowflake.services.GetOfferService;
 import org.torproject.snowflake.services.RetroServiceGenerator;
 import org.torproject.snowflake.services.SendAnswerService;
@@ -290,8 +292,8 @@ public class MyPersistentService extends Service {
             @Override
             public void onMessage(DataChannel.Buffer buffer) {
                 //Relay it to WebSocket
-                Log.d(TAG, "onMessage: ");
-                webSocket.send(ByteString.of(buffer.data.asReadOnlyBuffer()));
+                Log.d(TAG, "onMessage:");
+                webSocket.send(RelaySerialization.clientToTor(buffer));
             }
 
             @Override
@@ -490,8 +492,7 @@ public class MyPersistentService extends Service {
                     @Override
                     public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
                         Log.d(TAG, "WebSocketListener: onMessage: Bytes");
-                        DataChannel.Buffer buffer = new DataChannel.Buffer(bytes.asByteBuffer(), true);
-                        mainDataChannel.send(buffer);
+                        mainDataChannel.send(RelaySerialization.torToClient(bytes));
                     }
 
                     @Override

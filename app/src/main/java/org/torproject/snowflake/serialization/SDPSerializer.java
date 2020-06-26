@@ -1,4 +1,4 @@
-package org.torproject.snowflake;
+package org.torproject.snowflake.serialization;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +11,7 @@ public class SDPSerializer {
                 new JSONObject(SDP).get("sdp").toString());
     }
 
-    public static String serializeAnswer(SessionDescription SDP){
+    public static String serializeAnswer(SessionDescription SDP) {
         return SDP.description;
     }
 }
