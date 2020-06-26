@@ -34,8 +34,6 @@ import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SessionDescription;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +64,7 @@ public class MyPersistentService extends Service {
     private CompositeDisposable compositeDisposable;
     private NotificationManager mNotificationManager;
     private boolean isConnectionAlive;
+    private boolean isWebSocketOpen;
     private SIDHelper sidHelper;
     private WebSocket webSocket;
 
@@ -102,6 +101,7 @@ public class MyPersistentService extends Service {
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         isConnectionAlive = false;
+        isWebSocketOpen = false;
         sidHelper = SIDHelper.getInstance();
         compositeDisposable = new CompositeDisposable();
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE); //Assigning the shared preferences
@@ -289,8 +289,8 @@ public class MyPersistentService extends Service {
             @Override
             public void onMessage(DataChannel.Buffer buffer) {
                 //Relay it to WebSocket
-                ByteBuffer data = ByteBuffer.wrap("HELLO".getBytes(Charset.defaultCharset())); //Sending some temporary data to test.
-                mainDataChannel.send(new DataChannel.Buffer(data, false));
+                Log.d(TAG, "onMessage: ");
+                webSocket.send(ByteString.of(buffer.data.asReadOnlyBuffer()));
             }
 
             @Override
@@ -467,31 +467,32 @@ public class MyPersistentService extends Service {
                     @Override
                     public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                         Log.d(TAG, "WebSocketListener: onClosed: ");
+                        isWebSocketOpen = false;
                     }
 
                     @Override
                     public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                         Log.d(TAG, "WebSocketListener: onClosing: ");
+                        isWebSocketOpen = false;
                     }
 
                     @Override
                     public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @org.jetbrains.annotations.Nullable Response response) {
                         Log.d(TAG, "WebSocketListener: onFailure: ");
-                    }
-
-                    @Override
-                    public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
-                        Log.d(TAG, "WebSocketListener: onMessage: ");
+                        isWebSocketOpen = false;
                     }
 
                     @Override
                     public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
-                        Log.d(TAG, "WebSocketListener: onMessage: ");
+                        Log.d(TAG, "WebSocketListener: onMessage: Bytes");
+                        DataChannel.Buffer buffer = new DataChannel.Buffer(bytes.asByteBuffer(), true);
+                        mainDataChannel.send(buffer);
                     }
 
                     @Override
                     public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
                         Log.d(TAG, "WebSocketListener: onOpen: ");
+                        isWebSocketOpen = true;
                     }
                 });
 
