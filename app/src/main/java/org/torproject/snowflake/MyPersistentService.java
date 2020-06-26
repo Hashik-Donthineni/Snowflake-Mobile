@@ -122,6 +122,7 @@ public class MyPersistentService extends Service {
             mainPeerConnection.dispose();
         }
 
+        webSocket.close(1000, "Normal closure");
         mNotificationManager.cancel(ForegroundServiceConstants.DEF_NOTIFICATION_ID);
         Log.d(TAG, "onDestroy: Service Destroyed");
         super.onDestroy();
@@ -352,6 +353,10 @@ public class MyPersistentService extends Service {
     private void fetchOffer() {
         //Fetch offer only when the connection is not alive/active and only when the service is on.
         if (isServiceStarted && !isConnectionAlive) {
+            if (isWebSocketOpen) {
+                //If the WebSocket is still open while a new offer is getting sent, it's old connection's WebSocket. So we can close it and re-open a new one.
+                webSocket.close(1000, "Normal Closure");
+            }
             isConnectionAlive = true; //Considering connection is alive from now on, until it is set to false.
             Log.d(TAG, "fetchOffer: Fetching offer from broker.");
             ///Retrofit call
