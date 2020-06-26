@@ -311,6 +311,7 @@ public class MyPersistentService extends Service {
 
                 if (STATE == DataChannel.State.OPEN) {
                     updateNotification("Connection Established. Serving one client.");
+                    startWebSocket();
                 } else if (STATE == DataChannel.State.CLOSED) {
                     updateNotification("Connection is closed. Resending offer...");
                     closeConnectionAndResend();
