@@ -461,7 +461,7 @@ public class MyPersistentService extends Service {
 
     private void startWebSocket() {
         OkHttpClient client = new OkHttpClient();
-        webSocket = client.newWebSocket(new Request.Builder().url(GlobalApplication.getBrokerUrl()).build()
+        webSocket = client.newWebSocket(new Request.Builder().url(GlobalApplication.getWebSocketUrl()).build()
                 , new WebSocketListener() {
                     @Override
                     public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
