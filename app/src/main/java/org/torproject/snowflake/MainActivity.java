@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 import org.torproject.snowflake.interfaces.MainFragmentCallback;
@@ -34,6 +35,21 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
             //Setting initial run to false.
             sharedPreferences.edit().putBoolean(getString(R.string.initial_run_boolean), false).apply();
         }
+
+        //Starting the MainFragment.
+        startFragment(MainFragment.newInstance());
+    }
+
+    /**
+     * Used to  replace the fragment in the "fragment_container"
+     *
+     * @param fragment New Fragment that is to be placed in the container.
+     */
+    private void startFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container,
+                        fragment).commit();
     }
 
     /**
