@@ -8,6 +8,10 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.torproject.snowflake.R;
+import org.torproject.snowflake.constants.SettingsConstants;
+
+import java.util.Iterator;
+import java.util.Map;
 
 public class AppSettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -21,7 +25,19 @@ public class AppSettingsFragment extends PreferenceFragmentCompat implements Sha
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.app_settings, rootKey);
-        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        SharedPreferences sharedPreferences = getPreferenceManager().getSharedPreferences();
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        //When the fragment is started we have to check and set the EditTexts' to active.
+        Map<String, String> settingMap = SettingsConstants.getSettingMap();
+        for(String button: settingMap.keySet()){
+            String editT = settingMap.get(button);
+
+            boolean isEnabled = sharedPreferences.getBoolean(button, false);
+            findPreference(editT).setEnabled(isEnabled);
+            findPreference(editT).setSummary(
+                    sharedPreferences.getString(editT, "Default Value"));
+        }
     }
 
     @Override
@@ -49,7 +65,7 @@ public class AppSettingsFragment extends PreferenceFragmentCompat implements Sha
             //It's an Edit Text
             String editValue = sharedPreferences.getString(key, "");
             if (!editValue.equals(""))
-                findPreference(key).setSummary(editValue); //Setting Edit text to edited value
+                findPreference(key).setSummary(editValue.trim()); //Setting Edit text to edited value
             else
                 findPreference(key).setSummary("Using Default"); //Setting Edit text to Default because user left it empty.
         }
