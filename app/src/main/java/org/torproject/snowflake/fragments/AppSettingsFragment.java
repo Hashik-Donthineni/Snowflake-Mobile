@@ -10,7 +10,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import org.torproject.snowflake.R;
 import org.torproject.snowflake.constants.SettingsConstants;
 
-import java.util.Iterator;
 import java.util.Map;
 
 public class AppSettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -30,13 +29,17 @@ public class AppSettingsFragment extends PreferenceFragmentCompat implements Sha
 
         //When the fragment is started we have to check and set the EditTexts' to active.
         Map<String, String> settingMap = SettingsConstants.getSettingMap();
-        for(String button: settingMap.keySet()){
-            String editT = settingMap.get(button);
+        for (String settingSwitch : settingMap.keySet()) {
+            String editT = settingMap.get(settingSwitch);
 
-            boolean isEnabled = sharedPreferences.getBoolean(button, false);
-            findPreference(editT).setEnabled(isEnabled);
-            findPreference(editT).setSummary(
-                    sharedPreferences.getString(editT, "Default Value"));
+            boolean isEnabled = sharedPreferences.getBoolean(settingSwitch, false);
+            if (!isEnabled)
+                findPreference(settingSwitch).setSummary(SettingsConstants.DEFAULT);
+
+            Preference editText = findPreference(editT);
+            editText.setEnabled(isEnabled);
+            editText.setSummary(
+                    sharedPreferences.getString(editT, SettingsConstants.DEFAULT));
         }
     }
 
@@ -57,9 +60,9 @@ public class AppSettingsFragment extends PreferenceFragmentCompat implements Sha
                 if (!previousValue.equals(""))
                     editTextPreference.setSummary(previousValue); //When Switch is turned on set the summary to previously set Value.
                 else
-                    editTextPreference.setSummary("Using Default"); //If there is no previous value, then using null.
+                    editTextPreference.setSummary(SettingsConstants.DEFAULT); //If there is no previous value, then using null.
             } else {
-                findPreference(key).setSummary("Using Default"); //Default is shown when switch is off.
+                findPreference(key).setSummary(SettingsConstants.DEFAULT); //Default is shown when switch is off.
             }
         } else {
             //It's an Edit Text
@@ -67,7 +70,7 @@ public class AppSettingsFragment extends PreferenceFragmentCompat implements Sha
             if (!editValue.equals(""))
                 findPreference(key).setSummary(editValue.trim()); //Setting Edit text to edited value
             else
-                findPreference(key).setSummary("Using Default"); //Setting Edit text to Default because user left it empty.
+                findPreference(key).setSummary(SettingsConstants.DEFAULT); //Setting Edit text to Default because user left it empty.
         }
     }
 
