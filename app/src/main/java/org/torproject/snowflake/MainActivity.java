@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -21,12 +23,15 @@ import org.torproject.snowflake.interfaces.MainFragmentCallback;
 public class MainActivity extends AppCompatActivity implements MainFragmentCallback {
     private static final String TAG = "MainActivity";
     private SharedPreferences sharedPreferences;
+    private Button settingsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
+        settingsButton = findViewById(R.id.settings_button);
+
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
 
         //Creating notification channel if app is being run for the first time
@@ -35,6 +40,14 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
             //Setting initial run to false.
             sharedPreferences.edit().putBoolean(getString(R.string.initial_run_boolean), false).apply();
         }
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Starting Settings Activity.
+                startFragment(AppSettingsFragment.newInstance());
+            }
+        });
 
         //Starting the MainFragment.
         startFragment(MainFragment.newInstance());
