@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
+import org.torproject.snowflake.constants.FragmentConstants;
 import org.torproject.snowflake.interfaces.MainFragmentCallback;
 
 /**
@@ -22,6 +24,7 @@ import org.torproject.snowflake.interfaces.MainFragmentCallback;
  */
 public class MainActivity extends AppCompatActivity implements MainFragmentCallback {
     private static final String TAG = "MainActivity";
+    int currentFragment;
     private SharedPreferences sharedPreferences;
     private Button settingsButton;
 
@@ -59,6 +62,14 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
      * @param fragment New Fragment that is to be placed in the container.
      */
     private void startFragment(Fragment fragment) {
+        if (fragment instanceof MainFragment) {
+            currentFragment = FragmentConstants.MAIN_FRAGMENT;
+        } else {
+            currentFragment = FragmentConstants.APP_SETTINGS_FRAGMENT;
+        }
+
+        Log.d(TAG, "startFragment: " + currentFragment);
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container,
@@ -106,5 +117,14 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
             channel.setSound(null, null);
             notificationManager.createNotificationChannel(channel);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //If the back is pressed on AppSettingsFragment take it back to MainFragment.
+        if(currentFragment == FragmentConstants.APP_SETTINGS_FRAGMENT)
+            startFragment(MainFragment.newInstance());
+        else
+            super.onBackPressed();
     }
 }
