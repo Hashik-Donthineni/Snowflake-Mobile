@@ -8,16 +8,16 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
+import org.torproject.snowflake.interfaces.MainFragmentCallback;
 
 /**
  * MainActivity is the main UI of the application.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainFragmentCallback {
     private static final String TAG = "MainActivity";
     private SharedPreferences sharedPreferences;
 
@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        setSupportActionBar(findViewById(R.id.toolbar));
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
 
         //Creating notification channel if app is being run for the first time
@@ -34,16 +34,6 @@ public class MainActivity extends AppCompatActivity {
             //Setting initial run to false.
             sharedPreferences.edit().putBoolean(getString(R.string.initial_run_boolean), false).apply();
         }
-
-        Button startButton = findViewById(R.id.start_button);
-        startButton.setOnClickListener(v -> {
-            if (isServiceRunning()) //Toggling the service.
-                serviceToggle(ForegroundServiceConstants.ACTION_STOP);
-            else
-                serviceToggle(ForegroundServiceConstants.ACTION_START);
-        });
-        if (BuildConfig.DEBUG)
-            startButton.performClick(); //To perform an automatic click in testing environment.
     }
 
     /**
@@ -51,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param action An Action from ForegroundServiceConstants.
      */
-    private void serviceToggle(String action) {
+    public void serviceToggle(String action) {
         Intent serviceIntent = new Intent(MainActivity.this, MyPersistentService.class);
         serviceIntent.setAction(action);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -66,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @return boolean whether the service is running or not.
      */
-    private boolean isServiceRunning() {
+    public boolean isServiceRunning() {
         return sharedPreferences.getBoolean(getString(R.string.is_service_running_bool), false);
     }
 
