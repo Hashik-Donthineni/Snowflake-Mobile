@@ -46,7 +46,8 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Button startButton = container.findViewById(R.id.start_button);
+        View rootView = inflater.inflate(R.layout.fragment_main_fragment, container, false);
+        Button startButton = rootView.findViewById(R.id.start_button);
         startButton.setOnClickListener(v -> {
             if (callback.isServiceRunning()) //Toggling the service.
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_STOP);
@@ -57,7 +58,7 @@ public class MainFragment extends Fragment {
             startButton.performClick(); //To perform an automatic click in testing environment.
 
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main_fragment, container, false);
+        return rootView;
     }
 
     @Override
