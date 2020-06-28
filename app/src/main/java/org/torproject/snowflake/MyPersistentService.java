@@ -123,8 +123,8 @@ public class MyPersistentService extends Service {
             mainPeerConnection.close();
             mainPeerConnection.dispose();
         }
-
-        webSocket.close(1000, "Normal closure");
+        if (webSocket != null)
+            webSocket.close(1000, "Normal closure");
         mNotificationManager.cancel(ForegroundServiceConstants.DEF_NOTIFICATION_ID);
         Log.d(TAG, "onDestroy: Service Destroyed");
         super.onDestroy();
