@@ -276,7 +276,10 @@ public class MyPersistentService extends Service {
     private PeerConnection createPeerConnection(PeerConnectionFactory factory) {
         Log.d(TAG, "createPeerConnection: Creating a new peer connection");
         List<PeerConnection.IceServer> iceServers = new LinkedList<>();
-//        iceServers.add(PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer()); To Add custom ICE servers.
+        if (GlobalApplication.getSTUN() != null) {
+            iceServers.add(PeerConnection.IceServer.builder(GlobalApplication.getSTUN())
+                    .createIceServer()); //Adding custom ICE server.
+        }
         PeerConnection.RTCConfiguration rtcConfiguration = new PeerConnection.RTCConfiguration(iceServers);
         PeerConnection.Observer pcObserver = new MyPeerConnectionObserver(TAG, new PeerConnectionObserverCallback() {
 
