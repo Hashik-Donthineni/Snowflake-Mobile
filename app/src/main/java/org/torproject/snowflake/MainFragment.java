@@ -34,7 +34,6 @@ public class MainFragment extends Fragment {
 
     public static MainFragment newInstance() {
         MainFragment fragment = new MainFragment();
-        Bundle bundle = new Bundle();
         return fragment;
     }
 

@@ -1,25 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Snowflake Settings">
+    <PreferenceCategory
+        android:title="Snowflake Settings"
+        app:iconSpaceReserved="false">
+        <SwitchPreference
+            android:key="stun_switch"
+            android:title="Set STUN server"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:enabled="false"
+            android:key="stun_edit_text"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="Using Default"
+            android:title="Set STUN server"
+            app:iconSpaceReserved="false" />
 
+        <SwitchPreference
+            android:key="broker_switch"
+            android:title="Set broker URL"
+            app:iconSpaceReserved="false" />
         <EditTextPreference
-            android:defaultValue="Default value"
-            android:key="edit_text_preference_1"
+            android:enabled="false"
+            android:key="broker_switch_edit_text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Custom STUN Server" />
+            android:summary="Using Default"
+            android:title="Set broker URL"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreference
+            android:key="relay_switch"
+            android:title="Set relay URL"
+            app:iconSpaceReserved="false" />
         <EditTextPreference
-            android:defaultValue="Default value"
-            android:key="edit_text_preference_1"
+            android:enabled="false"
+            android:key="relay_switch_edit_text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Custom Broker URL" />
-        <EditTextPreference
-            android:defaultValue="Default value"
-            android:key="edit_text_preference_2"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="Custom Relay URL" />
+            android:summary="Using Default"
+            android:title="Custom relay URL"
+            app:iconSpaceReserved="false" />
+
     </PreferenceCategory>
 </PreferenceScreen>
