@@ -7,6 +7,7 @@
         app:iconSpaceReserved="false">
         <SwitchPreference
             android:key="stun_switch"
+            android:summary="Using Default"
             android:title="Set STUN server"
             app:iconSpaceReserved="false" />
         <EditTextPreference
@@ -15,29 +16,31 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="Using Default"
-            android:title="Set STUN server"
+            android:title="Custom STUN server"
             app:iconSpaceReserved="false" />
 
         <SwitchPreference
             android:key="broker_switch"
+            android:summary="Using Default"
             android:title="Set broker URL"
             app:iconSpaceReserved="false" />
         <EditTextPreference
             android:enabled="false"
-            android:key="broker_switch_edit_text"
+            android:key="broker_edit_text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="Using Default"
-            android:title="Set broker URL"
+            android:title="Custom broker URL"
             app:iconSpaceReserved="false" />
 
         <SwitchPreference
             android:key="relay_switch"
+            android:summary="Using Default"
             android:title="Set relay URL"
             app:iconSpaceReserved="false" />
         <EditTextPreference
             android:enabled="false"
-            android:key="relay_switch_edit_text"
+            android:key="relay_edit_text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="Using Default"
