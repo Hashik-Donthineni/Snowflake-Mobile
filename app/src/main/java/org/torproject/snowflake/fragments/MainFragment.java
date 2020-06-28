@@ -1,4 +1,4 @@
-package org.torproject.snowflake;
+package org.torproject.snowflake.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import org.torproject.snowflake.BuildConfig;
+import org.torproject.snowflake.R;
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 import org.torproject.snowflake.interfaces.MainFragmentCallback;
 

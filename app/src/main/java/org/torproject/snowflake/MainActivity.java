@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment;
 
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 import org.torproject.snowflake.constants.FragmentConstants;
+import org.torproject.snowflake.fragments.AppSettingsFragment;
+import org.torproject.snowflake.fragments.MainFragment;
 import org.torproject.snowflake.interfaces.MainFragmentCallback;
 
 /**
