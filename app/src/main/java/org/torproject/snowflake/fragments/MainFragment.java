@@ -55,8 +55,6 @@ public class MainFragment extends Fragment {
             else
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_START);
         });
-        if (BuildConfig.DEBUG)
-            startButton.performClick(); //To perform an automatic click in testing environment.
 
         // Inflate the layout for this fragment
         return rootView;
