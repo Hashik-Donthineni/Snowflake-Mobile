@@ -317,10 +317,9 @@ public class MyPersistentService extends Service {
 
                 if (STATE == DataChannel.State.OPEN) {
                     updateNotification("Connection Established. Serving one client.");
-                    startWebSocket();
                 } else if (STATE == DataChannel.State.CLOSED) {
                     updateNotification("Connection is closed. Resending offer...");
-                    closeConnectionAndResend();
+                    closeConnections(true);
                 }
             }
         });
@@ -340,6 +339,7 @@ public class MyPersistentService extends Service {
             public void onCreateSuccess(SessionDescription sessionDescription) {
                 mainPeerConnection.setLocalDescription(new SimpleSdpObserver("Local"), sessionDescription);
                 //Wait till ICE Gathering/ Trickling is finished to send the answer.
+                startWebSocket(); //While waiting, opening the WebSocket connection.
             }
 
             @Override
@@ -441,7 +441,7 @@ public class MyPersistentService extends Service {
     private void answerResponseSuccess(AnsResponse ansResponse) {
         if (ansResponse.getStatus().equals(BrokerConstants.CLIENT_GONE)) {
             Log.d(TAG, "answerResponseSuccess: Client Gone");
-            closeConnectionAndResend();
+            closeConnections(true);
         } else {
             Log.d(TAG, "answerResponseSuccess: Sending Success");
         }
@@ -459,12 +459,25 @@ public class MyPersistentService extends Service {
 
     /**
      * Closing the connection and resending the request to get SDP.
+     *
+     * @param resend If the service should resend the request or not.
      */
-    private void closeConnectionAndResend() {
-        Log.d(TAG, "closeConnectionAndResend: Closing connection and resending request.");
-        //Closing both to avoid memory leak.
-        mainDataChannel.close();
-        mainPeerConnection.close();
+    private void closeConnections(boolean resend) {
+        if (!resend) { //If you don't want to resend
+            Log.d(TAG, "closeConnection: Closing connection");
+            //Closing both to avoid memory leak.
+            if (mainDataChannel != null)
+                mainDataChannel.close();
+            if (mainPeerConnection != null)
+                mainPeerConnection.close();
+            if (webSocket != null && isWebSocketOpen){
+                webSocket.close(1000, "Normal closure");
+                isWebSocketOpen = false;
+            }
+
+            return;
+        }
+        Log.d(TAG, "closeConnection: Connections closed. Resending request for offer...");
         isConnectionAlive = false;
     }
 
@@ -472,38 +485,46 @@ public class MyPersistentService extends Service {
 
     private void startWebSocket() {
         OkHttpClient client = new OkHttpClient();
-        webSocket = client.newWebSocket(new Request.Builder().url(GlobalApplication.getWebSocketUrl()).build()
-                , new WebSocketListener() {
-                    @Override
-                    public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
-                        Log.d(TAG, "WebSocketListener: onClosed: ");
-                        isWebSocketOpen = false;
-                    }
+        try {
+            Request req = new Request.Builder().url(GlobalApplication.getWebSocketUrl()).build();
+            webSocket = client.newWebSocket(req,
+                    new WebSocketListener() {
+                        @Override
+                        public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                            Log.d(TAG, "WebSocketListener: onClosed: ");
+                            isWebSocketOpen = false;
+                        }
 
-                    @Override
-                    public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
-                        Log.d(TAG, "WebSocketListener: onClosing: ");
-                        isWebSocketOpen = false;
-                    }
+                        @Override
+                        public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                            Log.d(TAG, "WebSocketListener: onClosing: ");
+                            isWebSocketOpen = false;
+                        }
 
-                    @Override
-                    public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @org.jetbrains.annotations.Nullable Response response) {
-                        Log.d(TAG, "WebSocketListener: onFailure: ");
-                        isWebSocketOpen = false;
-                    }
+                        @Override
+                        public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @org.jetbrains.annotations.Nullable Response response) {
+                            Log.d(TAG, "WebSocketListener: onFailure: ");
+                            isWebSocketOpen = false;
+                        }
 
-                    @Override
-                    public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
-                        Log.d(TAG, "WebSocketListener: onMessage: Bytes");
-                        mainDataChannel.send(RelaySerialization.torToClient(bytes));
-                    }
+                        @Override
+                        public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
+                            Log.d(TAG, "WebSocketListener: onMessage: Bytes");
+                            mainDataChannel.send(RelaySerialization.torToClient(bytes));
+                        }
 
-                    @Override
-                    public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
-                        Log.d(TAG, "WebSocketListener: onOpen: ");
-                        isWebSocketOpen = true;
-                    }
-                });
+                        @Override
+                        public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
+                            Log.d(TAG, "WebSocketListener: onOpen: ");
+                            isWebSocketOpen = true;
+                        }
+                    });
+        } catch (IllegalArgumentException e) {
+            updateNotification("Invalid Relay URL entered. Verify and restart.");
+            e.printStackTrace();
+            //We don't want to resend the request for offer unless user gives a valid URL and restarts the service.
+            closeConnections(false);
+        }
 
         client.dispatcher().executorService().shutdown();
     }
