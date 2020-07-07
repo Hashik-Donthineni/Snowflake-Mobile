@@ -417,8 +417,15 @@ public class MyPersistentService extends Service {
      * @param t
      */
     public void offerRequestFailure(Throwable t) {
+        if (t instanceof NullPointerException) {
+            //We don't want to resend the request for offer unless user gives a valid URL and restarts the service.
+            updateNotification("Invalid STUN server assigned. Please verify and restart.");
+            closeConnections(false);
+            return;
+        }
         updateNotification("Request failed, retrying...");
         Log.d(TAG, "requestFailure: " + t.getMessage());
+        t.printStackTrace();
         isConnectionAlive = false;
     }
 
