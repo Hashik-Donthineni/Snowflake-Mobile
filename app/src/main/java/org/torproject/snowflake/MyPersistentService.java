@@ -491,6 +491,8 @@ public class MyPersistentService extends Service {
                 webSocket.close(1000, "Normal closure");
                 isWebSocketOpen = false;
             }
+            if (compositeDisposable != null)
+                compositeDisposable.dispose(); //Disposing all the threads. Including network calls.
 
             return;
         }
