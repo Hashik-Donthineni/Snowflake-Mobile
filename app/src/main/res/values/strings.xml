@@ -5,6 +5,4 @@
     <string name="not_channel_desc">This Channel should not be muted. The Android system will consider Snowflake not import and will kill the service if it\'s muted.</string>
     <string name="initial_run_boolean">initial_run</string>
     <string name="not_channel_name">Snowflake Service</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
