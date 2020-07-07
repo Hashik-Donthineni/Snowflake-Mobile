@@ -365,7 +365,17 @@ public class MyPersistentService extends Service {
             isConnectionAlive = true; //Considering connection is alive from now on, until it is set to false.
             Log.d(TAG, "fetchOffer: Fetching offer from broker.");
             ///Retrofit call
-            final GetOfferService getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
+            final GetOfferService getOfferService;
+            try {
+                getOfferService = RetroServiceGenerator.createService(GetOfferService.class);
+            } catch (IllegalArgumentException e) {
+                updateNotification("Incorrect Broker URL entered. Please verify and restart.");
+                //We don't want to resend the request for offer unless user gives a valid URL and restarts the service.
+                closeConnections(false);
+                e.printStackTrace();
+                return;
+            }
+
             Observable<SDPOfferResponse> offer = getOfferService.getOffer(GlobalApplication.getHeadersMap(), new OfferRequestBody(sidHelper.generateSid()));
             compositeDisposable.add(
                     offer.subscribeOn(Schedulers.io())
@@ -470,7 +480,7 @@ public class MyPersistentService extends Service {
                 mainDataChannel.close();
             if (mainPeerConnection != null)
                 mainPeerConnection.close();
-            if (webSocket != null && isWebSocketOpen){
+            if (webSocket != null && isWebSocketOpen) {
                 webSocket.close(1000, "Normal closure");
                 isWebSocketOpen = false;
             }
@@ -520,7 +530,7 @@ public class MyPersistentService extends Service {
                         }
                     });
         } catch (IllegalArgumentException e) {
-            updateNotification("Invalid Relay URL entered. Verify and restart.");
+            updateNotification("Incorrect Relay URL entered. Please verify and restart.");
             e.printStackTrace();
             //We don't want to resend the request for offer unless user gives a valid URL and restarts the service.
             closeConnections(false);
