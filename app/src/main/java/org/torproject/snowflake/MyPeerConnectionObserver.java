@@ -26,7 +26,8 @@ public class MyPeerConnectionObserver implements PeerConnection.Observer {
     @Override
     public void onIceConnectionChange(PeerConnection.IceConnectionState iceConnectionState) {
         Log.d(TAG, "onIceConnectionChange: " + iceConnectionState);
-        //TODO:Handle Connection Failure.
+        if (iceConnectionState == PeerConnection.IceConnectionState.FAILED)
+            peerconnectionObserverCallback.iceConnectionFailed();
     }
 
     @Override

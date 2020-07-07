@@ -308,7 +308,8 @@ public class MyPersistentService extends Service {
             @Override
             public void iceConnectionFailed() {
                 Log.d(TAG, "iceConnectionFailed: ");
-                //TODO: Figuring out with trac ticket.
+                //Connection is terminated when ICE connection reaches FAILED state.
+                closeConnections(true);
             }
 
             @Override
