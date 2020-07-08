@@ -504,47 +504,50 @@ public class MyPersistentService extends Service {
     /////////////// Web Socket ////////////////////////
 
     private void startWebSocket() {
-        OkHttpClient client = new OkHttpClient();
+        Request req;
         try {
-            Request req = new Request.Builder().url(GlobalApplication.getWebSocketUrl()).build();
-            webSocket = client.newWebSocket(req,
-                    new WebSocketListener() {
-                        @Override
-                        public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
-                            Log.d(TAG, "WebSocketListener: onClosed: ");
-                            isWebSocketOpen = false;
-                        }
-
-                        @Override
-                        public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
-                            Log.d(TAG, "WebSocketListener: onClosing: ");
-                            isWebSocketOpen = false;
-                        }
-
-                        @Override
-                        public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @org.jetbrains.annotations.Nullable Response response) {
-                            Log.d(TAG, "WebSocketListener: onFailure: ");
-                            isWebSocketOpen = false;
-                        }
-
-                        @Override
-                        public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
-                            Log.d(TAG, "WebSocketListener: onMessage: Bytes");
-                            mainDataChannel.send(RelaySerialization.torToClient(bytes));
-                        }
-
-                        @Override
-                        public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
-                            Log.d(TAG, "WebSocketListener: onOpen: ");
-                            isWebSocketOpen = true;
-                        }
-                    });
+            req = new Request.Builder().url(GlobalApplication.getWebSocketUrl()).build();
         } catch (IllegalArgumentException e) {
             updateNotification("Incorrect Relay URL entered. Please verify and restart.");
             e.printStackTrace();
-            //We don't want to resend the request for offer unless user gives a valid URL and restarts the service.
+            //We don't want to resend the request for offer unless user gives a valid URL and restart the service.
             closeConnections(false);
+            return;
         }
+
+        OkHttpClient client = new OkHttpClient();
+        webSocket = client.newWebSocket(req,
+                new WebSocketListener() {
+                    @Override
+                    public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                        Log.d(TAG, "WebSocketListener: onClosed: ");
+                        isWebSocketOpen = false;
+                    }
+
+                    @Override
+                    public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                        Log.d(TAG, "WebSocketListener: onClosing: ");
+                        isWebSocketOpen = false;
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @org.jetbrains.annotations.Nullable Response response) {
+                        Log.d(TAG, "WebSocketListener: onFailure: ");
+                        isWebSocketOpen = false;
+                    }
+
+                    @Override
+                    public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
+                        Log.d(TAG, "WebSocketListener: onMessage: Bytes");
+                        mainDataChannel.send(RelaySerialization.torToClient(bytes));
+                    }
+
+                    @Override
+                    public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
+                        Log.d(TAG, "WebSocketListener: onOpen: ");
+                        isWebSocketOpen = true;
+                    }
+                });
 
         client.dispatcher().executorService().shutdown();
     }
