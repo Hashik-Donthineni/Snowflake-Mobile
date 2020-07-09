@@ -238,7 +238,6 @@ public class MyPersistentService extends Service {
     private void startWebRTCConnection() {
         Log.d(TAG, "startWebRTCConnection: Starting Connection.");
         initializePeerConnectionFactory(); //Android Specific, you can Ignore.
-        mainPeerConnection = createPeerConnection(factory); //Creating New Peer Connection.
         compositeDisposable.add(
                 //First argument is initialDelay, Second argument is the time after which it has to repeat.
                 Observable.interval(1, 5, TimeUnit.SECONDS)
@@ -392,6 +391,8 @@ public class MyPersistentService extends Service {
      * @param sdpOfferResponse
      */
     public void offerRequestSuccess(SDPOfferResponse sdpOfferResponse) {
+        //Creating New Peer Connection.
+        mainPeerConnection = createPeerConnection(factory);
         updateNotification("Fetching offer success. Creating Answer.");
         if (sdpOfferResponse.getStatus().equals(BrokerConstants.CLIENT_MATCH)) {
             updateNotification("Client match, generating answer...");
