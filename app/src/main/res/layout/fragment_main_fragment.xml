@@ -20,10 +20,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/start_button"
         android:layout_centerHorizontal="true"
-        android:paddingTop="10dp"
-        android:paddingLeft="50dp"
-        android:paddingRight="50dp"
         android:gravity="center"
+        android:paddingLeft="50dp"
+        android:paddingTop="10dp"
+        android:paddingRight="50dp"
         android:visibility="gone" />
 
 </RelativeLayout>

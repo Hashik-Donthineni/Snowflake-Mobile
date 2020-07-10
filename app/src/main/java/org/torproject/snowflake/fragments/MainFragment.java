@@ -2,7 +2,6 @@ package org.torproject.snowflake.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,7 +78,7 @@ public class MainFragment extends Fragment {
         int served = callback.getServed();
         Log.d(TAG, "showServed: " + served);
 
-        if(served > 0){
+        if (served > 0) {
             usersServedTV.setVisibility(View.VISIBLE);
             usersServedTV.setText(getString(R.string.users_served_text) + served);
         }
