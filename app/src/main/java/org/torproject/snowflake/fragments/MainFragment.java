@@ -2,6 +2,7 @@ package org.torproject.snowflake.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,6 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import org.torproject.snowflake.BuildConfig;
 import org.torproject.snowflake.R;
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 import org.torproject.snowflake.interfaces.MainFragmentCallback;
@@ -21,6 +21,7 @@ import org.torproject.snowflake.interfaces.MainFragmentCallback;
  * create an instance of this fragment.
  */
 public class MainFragment extends Fragment {
+    private static final String TAG = "MainFragment";
     MainFragmentCallback callback;
 
     public MainFragment() {
@@ -56,6 +57,9 @@ public class MainFragment extends Fragment {
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_START);
         });
 
+        //Calling this in case we return back to this fragment from a different fragment.
+        showServed();
+
         // Inflate the layout for this fragment
         return rootView;
     }
@@ -64,5 +68,9 @@ public class MainFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         callback = (MainFragmentCallback) context;
+    }
+
+    public void showServed() {
+        Log.d(TAG, "showServed: " + callback.getServed());
     }
 }

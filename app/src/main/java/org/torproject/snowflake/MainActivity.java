@@ -36,6 +36,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
  */
 public class MainActivity extends AppCompatActivity implements MainFragmentCallback {
     private static final String TAG = "MainActivity";
+    public int servedCount;
     int currentFragment;
     private SharedPreferences sharedPreferences;
     private Button settingsButton;
@@ -48,13 +49,21 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         setSupportActionBar(findViewById(R.id.toolbar));
         settingsButton = findViewById(R.id.settings_button);
         sharedPreferences = GlobalApplication.getAppPreferences();
+        servedCount = 0;
 
-
+        //Launching another thread to check, reset served date if need be.
         disposable = Single.fromCallable(this::checkServedDate)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe((status) -> {
-                    //Update The TextView showing users served to user.
+                .subscribe((status) -> { //Runs on main thread
+                    //By this point the servedCount must be reset or left as is after checking the dates.
+                    servedCount = sharedPreferences.getInt(getString(R.string.users_served), 0);
+
+                    Fragment mainFragment = getSupportFragmentManager().findFragmentByTag(Integer.toString(FragmentConstants.MAIN_FRAGMENT));
+                    //If the fragment is in foreground update the count. Or else ignore.
+                    if (mainFragment != null) {
+                        ((MainFragment) mainFragment).showServed();
+                    }
                 });
 
         //Creating notification channel if app is being run for the first time
@@ -93,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container,
-                        fragment).commit();
+                        fragment, Integer.toString(currentFragment)).commit();
     }
 
     /**
@@ -118,6 +127,15 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
      */
     public boolean isServiceRunning() {
         return sharedPreferences.getBoolean(getString(R.string.is_service_running_bool), false);
+    }
+
+    /**
+     * @return Total served users count in the past 24hrs.
+     */
+    @Override
+    public int getServed() {
+        //By default 0 is returned until the thread finishes executing checkServedDate function.
+        return servedCount;
     }
 
     /**
