@@ -14,4 +14,16 @@
         android:foreground="?android:attr/selectableItemBackground"
         android:text="Service Toggle" />
 
+    <TextView
+        android:id="@+id/users_served"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/start_button"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="10dp"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp"
+        android:gravity="center"
+        android:visibility="gone" />
+
 </RelativeLayout>

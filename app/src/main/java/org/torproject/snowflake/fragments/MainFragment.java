@@ -2,11 +2,13 @@ package org.torproject.snowflake.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -23,6 +25,7 @@ import org.torproject.snowflake.interfaces.MainFragmentCallback;
 public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
     MainFragmentCallback callback;
+    TextView usersServedTV;
 
     public MainFragment() {
         // Required empty public constructor
@@ -49,7 +52,9 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main_fragment, container, false);
+        usersServedTV = rootView.findViewById(R.id.users_served);
         Button startButton = rootView.findViewById(R.id.start_button);
+
         startButton.setOnClickListener(v -> {
             if (callback.isServiceRunning()) //Toggling the service.
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_STOP);
@@ -71,6 +76,12 @@ public class MainFragment extends Fragment {
     }
 
     public void showServed() {
-        Log.d(TAG, "showServed: " + callback.getServed());
+        int served = callback.getServed();
+        Log.d(TAG, "showServed: " + served);
+
+        if(served > 0){
+            usersServedTV.setVisibility(View.VISIBLE);
+            usersServedTV.setText("Users you have helped circumvent censorship in the past day \n" + served);
+        }
     }
 }
