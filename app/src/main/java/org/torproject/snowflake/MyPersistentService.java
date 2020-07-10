@@ -114,17 +114,8 @@ public class MyPersistentService extends Service {
     @Override
     public void onDestroy() {
         sharedPreferencesHelper(ForegroundServiceConstants.SERVICE_STOPPED);
-        if (compositeDisposable != null)
-            compositeDisposable.dispose(); //Disposing all the threads. Including network calls.
-        if (mainDataChannel != null) {
-            mainDataChannel.close();
-        }
-        if (mainPeerConnection != null) {
-            mainPeerConnection.close();
-            mainPeerConnection.dispose();
-        }
-        if (webSocket != null)
-            webSocket.close(1000, "Normal closure");
+        //Close and dispose off all connections
+        closeConnections(false);
         mNotificationManager.cancel(ForegroundServiceConstants.DEF_NOTIFICATION_ID);
         Log.d(TAG, "onDestroy: Service Destroyed");
         super.onDestroy();
@@ -484,15 +475,20 @@ public class MyPersistentService extends Service {
     private void closeConnections(boolean resend) {
         if (!resend) { //If you don't want to resend
             Log.d(TAG, "closeConnection: Closing connection");
-            //Closing both to avoid memory leak.
+            //Closing all to avoid memory leak.
             if (mainDataChannel != null)
                 mainDataChannel.close();
-            if (mainPeerConnection != null)
+
+            if (mainPeerConnection != null){
                 mainPeerConnection.close();
+                mainPeerConnection.dispose();
+            }
+
             if (webSocket != null && isWebSocketOpen) {
                 webSocket.close(1000, "Normal closure");
                 isWebSocketOpen = false;
             }
+
             if (compositeDisposable != null)
                 compositeDisposable.dispose(); //Disposing all the threads. Including network calls.
 
