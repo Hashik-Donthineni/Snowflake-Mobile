@@ -139,6 +139,18 @@ public class MyPersistentService extends Service {
         }
         editor.apply();
     }
+
+    /**
+     * users_served++
+     */
+    private void updateServedCount() {
+        SharedPreferences sp = GlobalApplication.getAppPreferences();
+        sp.edit()
+                .putInt(getString(R.string.users_served),
+                        sp.getInt(getString(R.string.users_served), 0) + 1)
+                .apply();
+    }
+
     /////////////// Notifications ////////////////////////
 
     /**
@@ -308,6 +320,7 @@ public class MyPersistentService extends Service {
 
                 if (STATE == DataChannel.State.OPEN) {
                     updateNotification("Connection Established. Serving one client.");
+                    updateServedCount();
                 } else if (STATE == DataChannel.State.CLOSED) {
                     updateNotification("Connection is closed. Resending offer...");
                     closeConnections(true);
