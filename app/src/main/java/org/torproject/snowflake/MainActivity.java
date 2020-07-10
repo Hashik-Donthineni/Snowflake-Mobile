@@ -27,7 +27,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -40,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     int currentFragment;
     private SharedPreferences sharedPreferences;
     private Button settingsButton;
+    private Disposable disposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +47,15 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         settingsButton = findViewById(R.id.settings_button);
-
         sharedPreferences = GlobalApplication.getAppPreferences();
+
+
+        disposable = Single.fromCallable(this::checkServedDate)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((status) -> {
+                    //Update The TextView showing users served to user.
+                });
 
         //Creating notification channel if app is being run for the first time
         if (sharedPreferences.getBoolean(getString(R.string.initial_run_boolean), true)) {
@@ -135,29 +142,33 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     /**
      * Function to check and update the date and users served.
      * Resets served count if the past served date is greater than 24hrs.
+     *
+     * @return True if the date parsing is done right without errors.
      */
-    public void checkServedDate() {
+    public boolean checkServedDate() {
         Log.d(TAG, "checkServedDate: ");
         SharedPreferences.Editor editor = sharedPreferences.edit();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
 
         try {
-            Date currentDate = simpleDateFormat.parse(Calendar.getInstance().getTime().toString());
+            String stringCurrentDate = simpleDateFormat.format(Calendar.getInstance().getTime());
             String stringRecordedDate = sharedPreferences.getString(getString(R.string.served_date), "");
 
             //No value for key. Set the date value to current date and users served to 0.
             if (stringRecordedDate.equals("")) {
-                editor.putString(getString(R.string.served_date), simpleDateFormat.format(currentDate));
+                editor.putString(getString(R.string.served_date), stringCurrentDate);
                 editor.putInt(getString(R.string.users_served), 0);
             } else {
                 //Check if the current system date is greater than recorded date, if so reset the "served" flag.
                 Date recordedDate = simpleDateFormat.parse(stringRecordedDate);
+                Date currentDate = simpleDateFormat.parse(stringCurrentDate);
+
                 Log.d(TAG, "checkServedDate: Current Date:" + currentDate.toString() + "  Recorded Date:" + recordedDate.toString());
                 int comparision = currentDate.compareTo(recordedDate);
 
                 if (comparision == 0) {
                     //Current date is same as recordedDate no need to reset. Since it's less than 24hrs.
-                    return;
+                    return true;
                 } else {
                     //Current date is bigger than recorded date. Reset the values. i.e comparision > 0
                     editor.putString(getString(R.string.served_date), simpleDateFormat.format(currentDate));
@@ -170,7 +181,9 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         } catch (ParseException e) {
             e.printStackTrace();
             Log.e(TAG, "checkServedDate: Invalid Date Parsing");
+            return false;
         }
+        return true;
     }
 
 
@@ -181,5 +194,12 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
             startFragment(MainFragment.newInstance());
         else
             super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        //Killing of thread
+        disposable.dispose();
+        super.onDestroy();
     }
 }
