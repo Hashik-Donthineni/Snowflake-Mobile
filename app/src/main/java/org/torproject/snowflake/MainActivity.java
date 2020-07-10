@@ -21,6 +21,17 @@ import org.torproject.snowflake.fragments.AppSettingsFragment;
 import org.torproject.snowflake.fragments.MainFragment;
 import org.torproject.snowflake.interfaces.MainFragmentCallback;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 /**
  * MainActivity is the main UI of the application.
  */
@@ -121,10 +132,52 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         }
     }
 
+    /**
+     * Function to check and update the date and users served.
+     * Resets served count if the past served date is greater than 24hrs.
+     */
+    public void checkServedDate() {
+        Log.d(TAG, "checkServedDate: ");
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+
+        try {
+            Date currentDate = simpleDateFormat.parse(Calendar.getInstance().getTime().toString());
+            String stringRecordedDate = sharedPreferences.getString(getString(R.string.served_date), "");
+
+            //No value for key. Set the date value to current date and users served to 0.
+            if (stringRecordedDate.equals("")) {
+                editor.putString(getString(R.string.served_date), simpleDateFormat.format(currentDate));
+                editor.putInt(getString(R.string.users_served), 0);
+            } else {
+                //Check if the current system date is greater than recorded date, if so reset the "served" flag.
+                Date recordedDate = simpleDateFormat.parse(stringRecordedDate);
+                Log.d(TAG, "checkServedDate: Current Date:" + currentDate.toString() + "  Recorded Date:" + recordedDate.toString());
+                int comparision = currentDate.compareTo(recordedDate);
+
+                if (comparision == 0) {
+                    //Current date is same as recordedDate no need to reset. Since it's less than 24hrs.
+                    return;
+                } else {
+                    //Current date is bigger than recorded date. Reset the values. i.e comparision > 0
+                    editor.putString(getString(R.string.served_date), simpleDateFormat.format(currentDate));
+                    editor.putInt(getString(R.string.users_served), 0);
+                }
+            }
+
+            editor.apply();
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Log.e(TAG, "checkServedDate: Invalid Date Parsing");
+        }
+    }
+
+
     @Override
     public void onBackPressed() {
         //If the back is pressed on AppSettingsFragment take it back to MainFragment.
-        if(currentFragment == FragmentConstants.APP_SETTINGS_FRAGMENT)
+        if (currentFragment == FragmentConstants.APP_SETTINGS_FRAGMENT)
             startFragment(MainFragment.newInstance());
         else
             super.onBackPressed();
