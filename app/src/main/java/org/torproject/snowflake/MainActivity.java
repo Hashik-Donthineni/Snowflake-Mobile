@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         setSupportActionBar(findViewById(R.id.toolbar));
         settingsButton = findViewById(R.id.settings_button);
 
-        sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
+        sharedPreferences = GlobalApplication.getAppPreferences();
 
         //Creating notification channel if app is being run for the first time
         if (sharedPreferences.getBoolean(getString(R.string.initial_run_boolean), true)) {
