@@ -7,4 +7,5 @@
     <string name="not_channel_name">Snowflake Service</string>
     <string name="users_served">users_served</string>
     <string name="served_date">date</string>
+    <string name="users_served_text">Users you have helped circumvent censorship in the past day \n</string>
 </resources>

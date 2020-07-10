@@ -81,7 +81,7 @@ public class MainFragment extends Fragment {
 
         if(served > 0){
             usersServedTV.setVisibility(View.VISIBLE);
-            usersServedTV.setText("Users you have helped circumvent censorship in the past day \n" + served);
+            usersServedTV.setText(getString(R.string.users_served_text) + served);
         }
     }
 }
