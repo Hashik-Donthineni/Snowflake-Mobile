@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     private SharedPreferences sharedPreferences;
     private Button settingsButton;
     private Disposable disposable;
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +60,8 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
                     //By this point the servedCount must be reset or left as is after checking the dates.
                     servedCount = sharedPreferences.getInt(getString(R.string.users_served), 0);
 
-                    Fragment mainFragment = getSupportFragmentManager().findFragmentByTag(Integer.toString(FragmentConstants.MAIN_FRAGMENT));
-                    //If the fragment is in foreground update the count. Or else ignore.
-                    if (mainFragment != null) {
-                        ((MainFragment) mainFragment).showServed();
-                    }
+                    setListenerForCount();
+                    updateCountInFragment();
                 });
 
         //Creating notification channel if app is being run for the first time
@@ -83,6 +81,40 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
 
         //Starting the MainFragment.
         startFragment(MainFragment.newInstance());
+    }
+
+    /**
+     * Updates the users served count in the text-view of MainFragment if it's in the foreground or else It'll ignore.
+     */
+    private void updateCountInFragment() {
+        Log.d(TAG, "updateCountInFragment: Updating count");
+
+        Fragment mainFragment = getSupportFragmentManager().findFragmentByTag(Integer.toString(FragmentConstants.MAIN_FRAGMENT));
+        //If the fragment is in foreground update the count. Or else ignore.
+        if (mainFragment != null) {
+            ((MainFragment) mainFragment).showServed();
+        }
+    }
+
+    /**
+     * Used to update the count without restarting the app to update the users served count.
+     * Listener is set on the file to check for changes.
+     */
+    private void setListenerForCount() {
+        Log.d(TAG, "setListenerForCount: Setting listener");
+
+        // Do NOT make the variable local. SP listener listens on WeakHashMap.
+        // It'll get garbage collected as soon as code leaves the scope. Hence listener won't work.
+        listener = (prefs, key) -> {
+            Log.d(TAG, "setListenerForCount: Listener: Key = " + key);
+
+            if (key.equals(getString(R.string.users_served))) {
+                servedCount = sharedPreferences.getInt(key, 0);
+                updateCountInFragment();
+            }
+        };
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
     }
 
     /**
@@ -218,6 +250,8 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     protected void onDestroy() {
         //Killing of thread
         disposable.dispose();
+        //Unregistering the listener.
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener);
         super.onDestroy();
     }
 }
