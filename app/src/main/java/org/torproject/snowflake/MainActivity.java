@@ -58,17 +58,17 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((status) -> { //Runs on main thread
                     //By this point the servedCount must be reset or left as is after checking the dates.
-                    servedCount = sharedPreferences.getInt(getString(R.string.users_served), 0);
+                    servedCount = sharedPreferences.getInt(getString(R.string.users_served_key), 0);
 
                     setListenerForCount();
                     updateCountInFragment();
                 });
 
         //Creating notification channel if app is being run for the first time
-        if (sharedPreferences.getBoolean(getString(R.string.initial_run_boolean), true)) {
+        if (sharedPreferences.getBoolean(getString(R.string.initial_run_boolean_key), true)) {
             createNotificationChannel();
             //Setting initial run to false.
-            sharedPreferences.edit().putBoolean(getString(R.string.initial_run_boolean), false).apply();
+            sharedPreferences.edit().putBoolean(getString(R.string.initial_run_boolean_key), false).apply();
         }
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         listener = (prefs, key) -> {
             Log.d(TAG, "setListenerForCount: Listener: Key = " + key);
 
-            if (key.equals(getString(R.string.users_served))) {
+            if (key.equals(getString(R.string.users_served_key))) {
                 servedCount = sharedPreferences.getInt(key, 0);
                 updateCountInFragment();
             }
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
      * @return boolean whether the service is running or not.
      */
     public boolean isServiceRunning() {
-        return sharedPreferences.getBoolean(getString(R.string.is_service_running_bool), false);
+        return sharedPreferences.getBoolean(getString(R.string.is_service_running_bool_key), false);
     }
 
     /**
@@ -202,12 +202,12 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
 
         try {
             String stringCurrentDate = simpleDateFormat.format(Calendar.getInstance().getTime());
-            String stringRecordedDate = sharedPreferences.getString(getString(R.string.served_date), "");
+            String stringRecordedDate = sharedPreferences.getString(getString(R.string.served_date_key), "");
 
             //No value for key. Set the date value to current date and users served to 0.
             if (stringRecordedDate.equals("")) {
-                editor.putString(getString(R.string.served_date), stringCurrentDate);
-                editor.putInt(getString(R.string.users_served), 0);
+                editor.putString(getString(R.string.served_date_key), stringCurrentDate);
+                editor.putInt(getString(R.string.users_served_key), 0);
             } else {
                 //Check if the current system date is greater than recorded date, if so reset the "served" flag.
                 Date recordedDate = simpleDateFormat.parse(stringRecordedDate);
@@ -221,8 +221,8 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
                     return true;
                 } else {
                     //Current date is bigger than recorded date. Reset the values. i.e comparision > 0
-                    editor.putString(getString(R.string.served_date), simpleDateFormat.format(currentDate));
-                    editor.putInt(getString(R.string.users_served), 0);
+                    editor.putString(getString(R.string.served_date_key), simpleDateFormat.format(currentDate));
+                    editor.putInt(getString(R.string.users_served_key), 0);
                 }
             }
 

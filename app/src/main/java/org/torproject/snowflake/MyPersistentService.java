@@ -80,7 +80,7 @@ public class MyPersistentService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: executed with startId: " + startId);
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
-        isServiceStarted = sharedPreferences.getBoolean(getString(R.string.is_service_running_bool), false);
+        isServiceStarted = sharedPreferences.getBoolean(getString(R.string.is_service_running_bool_key), false);
 
         if (intent != null) {
             if (intent.getAction().equals(ForegroundServiceConstants.ACTION_START))
@@ -132,10 +132,10 @@ public class MyPersistentService extends Service {
 
         if (setState == ForegroundServiceConstants.SERVICE_RUNNING) {
             isServiceStarted = true;
-            editor.putBoolean(getString(R.string.is_service_running_bool), true);
+            editor.putBoolean(getString(R.string.is_service_running_bool_key), true);
         } else {
             isServiceStarted = false;
-            editor.putBoolean(getString(R.string.is_service_running_bool), false);
+            editor.putBoolean(getString(R.string.is_service_running_bool_key), false);
         }
         editor.apply();
     }
@@ -146,8 +146,8 @@ public class MyPersistentService extends Service {
     private void updateServedCount() {
         SharedPreferences sp = GlobalApplication.getAppPreferences();
         sp.edit()
-                .putInt(getString(R.string.users_served),
-                        sp.getInt(getString(R.string.users_served), 0) + 1)
+                .putInt(getString(R.string.users_served_key),
+                        sp.getInt(getString(R.string.users_served_key), 0) + 1)
                 .apply();
     }
 
