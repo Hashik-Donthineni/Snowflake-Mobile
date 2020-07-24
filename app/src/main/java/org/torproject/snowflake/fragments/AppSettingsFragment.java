@@ -33,13 +33,16 @@ public class AppSettingsFragment extends PreferenceFragmentCompat implements Sha
             String editT = settingMap.get(settingSwitch);
 
             boolean isEnabled = sharedPreferences.getBoolean(settingSwitch, false);
-            if (!isEnabled)
-                findPreference(settingSwitch).setSummary(SettingsConstants.DEFAULT);
-
             Preference editText = findPreference(editT);
             editText.setEnabled(isEnabled);
             editText.setSummary(
                     sharedPreferences.getString(editT, SettingsConstants.DEFAULT));
+
+            if (!isEnabled) {
+                findPreference(settingSwitch).setSummary(SettingsConstants.DEFAULT);
+                //Setting the summary of EditText to empty when the switch is off.
+                editText.setSummary("");
+            }
         }
     }
 
