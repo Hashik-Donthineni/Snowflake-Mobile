@@ -8,8 +8,11 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -72,8 +75,10 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     private void startFragment(Fragment fragment) {
         if (fragment instanceof MainFragment) {
             currentFragment = FragmentConstants.MAIN_FRAGMENT;
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         } else {
             currentFragment = FragmentConstants.APP_SETTINGS_FRAGMENT;
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         Log.d(TAG, "startFragment: " + currentFragment);
@@ -169,5 +174,16 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
             return presenter.getServedCount();
         else
             return 0;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
