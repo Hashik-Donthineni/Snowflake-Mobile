@@ -76,9 +76,11 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         if (fragment instanceof MainFragment) {
             currentFragment = FragmentConstants.MAIN_FRAGMENT;
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            settingsButton.setVisibility(View.VISIBLE);
         } else {
             currentFragment = FragmentConstants.APP_SETTINGS_FRAGMENT;
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            settingsButton.setVisibility(View.GONE);
         }
 
         Log.d(TAG, "startFragment: " + currentFragment);
