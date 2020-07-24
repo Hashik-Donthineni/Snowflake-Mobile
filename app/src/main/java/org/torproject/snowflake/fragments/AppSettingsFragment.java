@@ -60,9 +60,12 @@ public class AppSettingsFragment extends PreferenceFragmentCompat implements Sha
                 if (!previousValue.equals(""))
                     editTextPreference.setSummary(previousValue); //When Switch is turned on set the summary to previously set Value.
                 else
-                    editTextPreference.setSummary(SettingsConstants.DEFAULT); //If there is no previous value, then using null.
+                    editTextPreference.setSummary(SettingsConstants.DEFAULT); //If there is no previous value, then using default.
             } else {
-                findPreference(key).setSummary(SettingsConstants.DEFAULT); //Default is shown when switch is off.
+                //Default is shown when switch is off.
+                findPreference(key).setSummary(SettingsConstants.DEFAULT);
+                //When the switch is off the edit-text won't show any summary. Because it already signifies that the app is using default.
+                editTextPreference.setSummary("");
             }
         } else {
             //It's an Edit Text
