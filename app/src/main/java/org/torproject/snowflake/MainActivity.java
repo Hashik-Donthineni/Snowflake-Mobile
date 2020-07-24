@@ -7,13 +7,16 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
@@ -34,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     //Indicates if model finished checking the date and reset served count if need be.
     boolean isCheckDateFinished;
     private Button settingsButton;
+    private Disposable disposable;
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+    boolean transitionToggle = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +90,22 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
         }
 
         Log.d(TAG, "startFragment: " + currentFragment);
+
+        //////Animation
+
+        Slide slideTransition;
+        //This defines how the fragment moves. Either from left to right or right to left.
+        int gravity = transitionToggle ? Gravity.END : Gravity.START;
+        transitionToggle = !transitionToggle;
+        if (Build.VERSION.SDK_INT > 21) {
+            slideTransition = new Slide(gravity);
+        } else {
+            slideTransition = new Slide(GravityCompat.getAbsoluteGravity(gravity, getResources().getConfiguration().getLayoutDirection()));
+        }
+        slideTransition.setDuration(400);
+
+        fragment.setEnterTransition(slideTransition);
+        //////
 
         getSupportFragmentManager()
                 .beginTransaction()
