@@ -2,20 +2,18 @@ package org.torproject.snowflake.presenters;
 
 import android.util.Log;
 
-import org.torproject.snowflake.MainActivity;
-import org.torproject.snowflake.R;
-import org.torproject.snowflake.constants.AppPreferenceConstants;
 import org.torproject.snowflake.models.MainActivityModel;
+import org.torproject.snowflake.mvp.MainActivityMVP;
 
 /**
  * Presenter for MainActivity.
  */
-public class MainActivityPresenter {
+public class MainActivityPresenter implements MainActivityMVP.Presenter {
     private static final String TAG = "MainActivityPresenter";
-    View view;
-    MainActivityModel model;
+    MainActivityMVP.View view;
+    MainActivityMVP.Model model;
 
-    public MainActivityPresenter(View view) {
+    public MainActivityPresenter(MainActivityMVP.View view) {
         //Attaching
         this.view = view;
         model = MainActivityModel.getInstance(this);
@@ -33,7 +31,7 @@ public class MainActivityPresenter {
     public int getServedCount() {
         Log.d(TAG, "getServedCount: ");
         if (view != null) {
-            return model.getServedCount(AppPreferenceConstants.USER_SERVED_KEY);
+            return model.getServedCount();
         }
         return 0;
     }
@@ -41,7 +39,7 @@ public class MainActivityPresenter {
     public boolean getInitialRunBoolean() {
         Log.d(TAG, "getInitialRunBoolean: ");
         if (view != null) {
-            return model.getInitialRunBool(AppPreferenceConstants.INITIAL_RUN_KEY);
+            return model.getInitialRunBool();
         }
         return false;
     }
@@ -54,7 +52,7 @@ public class MainActivityPresenter {
     public void setInitialRunBoolean(boolean val) {
         Log.d(TAG, "setInitialRunBoolean: ");
         if (view != null) {
-            model.setInitialRunBool(AppPreferenceConstants.INITIAL_RUN_KEY, val);
+            model.setInitialRunBool(val);
         }
     }
 
@@ -78,12 +76,6 @@ public class MainActivityPresenter {
         }
     }
 
-    /**
-     * Getting the served date.
-     */
-    public String getDate() {
-        return model.getDate();
-    }
 
     public void checkDate() {
         model.checkDateAsync();

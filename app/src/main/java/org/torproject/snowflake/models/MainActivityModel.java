@@ -5,7 +5,7 @@ import android.util.Log;
 
 import org.torproject.snowflake.GlobalApplication;
 import org.torproject.snowflake.constants.AppPreferenceConstants;
-import org.torproject.snowflake.presenters.MainActivityPresenter;
+import org.torproject.snowflake.mvp.MainActivityMVP;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,22 +19,22 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 /**
  * Model for MainActivity to handle network calls, Shared preferences.
  */
-public class MainActivityModel {
+public class MainActivityModel implements MainActivityMVP.Model {
     private static final String TAG = "MainActivityModel";
     private static MainActivityModel instance = null;
     private SharedPreferences sharedPreferences;
-    private MainActivityPresenter presenter;
+    private MainActivityMVP.Presenter presenter;
     private int servedCount;
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
 
-    private MainActivityModel(MainActivityPresenter presenter) {
+    private MainActivityModel(MainActivityMVP.Presenter presenter) {
         sharedPreferences = GlobalApplication.getAppPreferences();
         this.presenter = presenter;
         servedCount = 0;
     }
 
-    public static MainActivityModel getInstance(MainActivityPresenter presenter) {
+    public static MainActivityModel getInstance(MainActivityMVP.Presenter presenter) {
         if (instance == null) {
             synchronized (MainActivityModel.class) {
                 instance = new MainActivityModel(presenter);
@@ -43,16 +43,16 @@ public class MainActivityModel {
         return instance;
     }
 
-    public int getServedCount(String key) {
-        return sharedPreferences.getInt(key, 0);
+    public int getServedCount() {
+        return sharedPreferences.getInt(AppPreferenceConstants.USER_SERVED_KEY, 0);
     }
 
-    public boolean getInitialRunBool(String key) {
-        return sharedPreferences.getBoolean(key, true);
+    public boolean getInitialRunBool() {
+        return sharedPreferences.getBoolean(AppPreferenceConstants.INITIAL_RUN_KEY, true);
     }
 
-    public void setInitialRunBool(String key, boolean val) {
-        sharedPreferences.edit().putBoolean(key, val).apply();
+    public void setInitialRunBool(boolean val) {
+        sharedPreferences.edit().putBoolean(AppPreferenceConstants.INITIAL_RUN_KEY, val).apply();
     }
 
     public boolean isServiceRunning() {
@@ -107,7 +107,7 @@ public class MainActivityModel {
 
         try {
             String stringCurrentDate = simpleDateFormat.format(Calendar.getInstance().getTime());
-            String stringRecordedDate = presenter.getDate();
+            String stringRecordedDate = getDate();
 
             //No value for key. Set the date value to current date and users served to 0.
             if (stringRecordedDate.equals("")) {
@@ -146,7 +146,7 @@ public class MainActivityModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((status) -> { //Runs on main thread
                         //By this point the servedCount must be reset or left as is after checking the dates.
-                        presenter.updateServedCount(getServedCount(AppPreferenceConstants.USER_SERVED_KEY));
+                        presenter.updateServedCount(getServedCount());
                         setListenerForCount();
                     });
         }
