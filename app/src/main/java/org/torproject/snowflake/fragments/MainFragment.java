@@ -61,8 +61,7 @@ public class MainFragment extends Fragment {
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_START);
         });
 
-        //Calling this in case we return back to this fragment from a different fragment.
-        showServed();
+        showServed(callback.getServed());
 
         // Inflate the layout for this fragment
         return rootView;
@@ -74,8 +73,7 @@ public class MainFragment extends Fragment {
         callback = (MainFragmentCallback) context;
     }
 
-    public void showServed() {
-        int served = callback.getServed();
+    public void showServed(int served) {
         Log.d(TAG, "showServed: " + served);
 
         if (served > 0) {
