@@ -27,9 +27,9 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     private static final String TAG = "MainActivity";
     int currentFragment;
     MainActivityPresenter presenter;
-    private Button settingsButton;
     //Indicates if model finished checking the date and reset served count if need be.
     boolean isCheckDateFinished;
+    private Button settingsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     @Override
     protected void onDestroy() {
         //Detach
-        presenter.onDestroy();
+        presenter.detach();
         super.onDestroy();
     }
 
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
 
     @Override
     public int getServed() {
-        if(isCheckDateFinished)
+        if (isCheckDateFinished)
             return presenter.getServedCount();
         else
             return 0;

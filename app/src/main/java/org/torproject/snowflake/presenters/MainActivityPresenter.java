@@ -23,10 +23,8 @@ public class MainActivityPresenter {
     /**
      * Cleaning
      */
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
-        //Calling on Destroy on model
-        model.onDestroy();
+    public void detach() {
+        Log.d(TAG, "detach: ");
         //Detaching
         view = null;
     }
@@ -83,14 +81,11 @@ public class MainActivityPresenter {
      * Getting the served date.
      */
     public String getDate() {
-        return model.getDate(((MainActivity) view).getString(R.string.served_date_key));
+        return model.getDate("date");
     }
 
     public void checkDate() {
         model.checkDateAsync();
-    }
-
-    public void setListenerForCount() {
     }
 
     /**

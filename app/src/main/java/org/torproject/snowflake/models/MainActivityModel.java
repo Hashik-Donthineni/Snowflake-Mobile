@@ -25,7 +25,6 @@ public class MainActivityModel {
     private SharedPreferences sharedPreferences;
     private MainActivityPresenter presenter;
     private int servedCount;
-    private Disposable disposable;
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
 
@@ -80,16 +79,6 @@ public class MainActivityModel {
         };
 
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
-    }
-
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
-        //Unregistering the listener.
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener);
-        //Disposing off call
-        disposable.dispose();
-        //Detaching presenter
-        presenter = null;
     }
 
     public String getDate(String dateKey) {
@@ -151,7 +140,8 @@ public class MainActivityModel {
     public void checkDateAsync() {
         //Launching another thread to check, reset served date if need be.
         if (presenter != null) {
-            disposable = Single.fromCallable(this::checkServedDate)
+            //By this point the servedCount must be reset or left as is after checking the dates.
+            Single.fromCallable(this::checkServedDate)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((status) -> { //Runs on main thread
