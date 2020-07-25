@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.torproject.snowflake.MainActivity;
 import org.torproject.snowflake.R;
+import org.torproject.snowflake.constants.AppPreferenceConstants;
 import org.torproject.snowflake.models.MainActivityModel;
 
 /**
@@ -32,7 +33,7 @@ public class MainActivityPresenter {
     public int getServedCount() {
         Log.d(TAG, "getServedCount: ");
         if (view != null) {
-            return model.getServedCount(((MainActivity) view).getString(R.string.users_served_key));
+            return model.getServedCount(AppPreferenceConstants.USER_SERVED_KEY);
         }
         return 0;
     }
@@ -40,7 +41,7 @@ public class MainActivityPresenter {
     public boolean getInitialRunBoolean() {
         Log.d(TAG, "getInitialRunBoolean: ");
         if (view != null) {
-            return model.getInitialRunBool(((MainActivity) view).getString(R.string.initial_run_boolean_key));
+            return model.getInitialRunBool(AppPreferenceConstants.INITIAL_RUN_KEY);
         }
         return false;
     }
@@ -53,7 +54,7 @@ public class MainActivityPresenter {
     public void setInitialRunBoolean(boolean val) {
         Log.d(TAG, "setInitialRunBoolean: ");
         if (view != null) {
-            model.setInitialRunBool(((MainActivity) view).getString(R.string.initial_run_boolean_key), val);
+            model.setInitialRunBool(AppPreferenceConstants.INITIAL_RUN_KEY, val);
         }
     }
 
@@ -65,7 +66,7 @@ public class MainActivityPresenter {
     public boolean isServiceRunning() {
         Log.d(TAG, "isServiceRunning: ");
         if (view != null) {
-            return model.isServiceRunning(((MainActivity) view).getString(R.string.is_service_running_bool_key));
+            return model.isServiceRunning();
         }
         return true;
     }
@@ -81,7 +82,7 @@ public class MainActivityPresenter {
      * Getting the served date.
      */
     public String getDate() {
-        return model.getDate("date");
+        return model.getDate();
     }
 
     public void checkDate() {

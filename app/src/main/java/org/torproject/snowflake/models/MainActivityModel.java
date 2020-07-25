@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.torproject.snowflake.GlobalApplication;
+import org.torproject.snowflake.constants.AppPreferenceConstants;
 import org.torproject.snowflake.presenters.MainActivityPresenter;
 
 import java.text.ParseException;
@@ -13,7 +14,6 @@ import java.util.Date;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
@@ -55,8 +55,8 @@ public class MainActivityModel {
         sharedPreferences.edit().putBoolean(key, val).apply();
     }
 
-    public boolean isServiceRunning(String key) {
-        return sharedPreferences.getBoolean(key, false);
+    public boolean isServiceRunning() {
+        return sharedPreferences.getBoolean(AppPreferenceConstants.IS_SERVICE_RUNNING_KEY, false);
     }
 
     /**
@@ -71,7 +71,7 @@ public class MainActivityModel {
         listener = (prefs, key) -> {
             Log.d(TAG, "setListenerForCount: Listener: Key = " + key);
 
-            if (key.equals("users_served")) {
+            if (key.equals(AppPreferenceConstants.USER_SERVED_KEY)) {
                 servedCount = sharedPreferences.getInt(key, 0);
                 if (presenter != null)
                     presenter.updateServedCount(servedCount);
@@ -81,17 +81,17 @@ public class MainActivityModel {
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
     }
 
-    public String getDate(String dateKey) {
-        return sharedPreferences.getString(dateKey, "");
+    public String getDate() {
+        return sharedPreferences.getString(AppPreferenceConstants.DATE_KEY, "");
     }
 
     /**
      * Setting the users served date and value.
      */
-    public void setDateAndServed(String dateKey, String valueKey, String date, int value) {
+    public void setDateAndServed(String date, int value) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(dateKey, date);
-        editor.putInt(valueKey, value);
+        editor.putString(AppPreferenceConstants.DATE_KEY, date);
+        editor.putInt(AppPreferenceConstants.USER_SERVED_KEY, value);
         editor.apply();
     }
 
@@ -111,7 +111,7 @@ public class MainActivityModel {
 
             //No value for key. Set the date value to current date and users served to 0.
             if (stringRecordedDate.equals("")) {
-                setDateAndServed("date", "users_served", stringCurrentDate, 0);
+                setDateAndServed(stringCurrentDate, 0);
             } else {
                 //Check if the current system date is greater than recorded date, if so reset the "served" flag.
                 Date recordedDate = simpleDateFormat.parse(stringRecordedDate);
@@ -125,7 +125,7 @@ public class MainActivityModel {
                     return true;
                 } else {
                     //Current date is bigger than recorded date. Reset the values. i.e comparision > 0
-                    setDateAndServed("date", "users_served", simpleDateFormat.format(currentDate), 0);
+                    setDateAndServed(simpleDateFormat.format(currentDate), 0);
                 }
             }
 
@@ -146,7 +146,7 @@ public class MainActivityModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((status) -> { //Runs on main thread
                         //By this point the servedCount must be reset or left as is after checking the dates.
-                        presenter.updateServedCount(getServedCount("users_served"));
+                        presenter.updateServedCount(getServedCount(AppPreferenceConstants.USER_SERVED_KEY));
                         setListenerForCount();
                     });
         }

@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="sharedpreference_file">org.torproject.snowflake.snowflake_preferences</string>
-    <string name="users_served_key">users_served</string>
-    <string name="served_date_key">date</string>
-    <string name="initial_run_boolean_key">initial_run</string>
-    <string name="is_service_running_bool_key">is_service_running</string>
 </resources>
