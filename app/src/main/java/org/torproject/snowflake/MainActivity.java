@@ -18,13 +18,13 @@ import org.torproject.snowflake.constants.FragmentConstants;
 import org.torproject.snowflake.fragments.AppSettingsFragment;
 import org.torproject.snowflake.fragments.MainFragment;
 import org.torproject.snowflake.interfaces.MainFragmentCallback;
-import org.torproject.snowflake.mvp.MainActivityMVP;
+import org.torproject.snowflake.mvp.MainActivityMVPContract;
 import org.torproject.snowflake.presenters.MainActivityPresenter;
 
 /**
  * MainActivity is the main UI of the application.
  */
-public class MainActivity extends AppCompatActivity implements MainFragmentCallback, MainActivityMVP.View {
+public class MainActivity extends AppCompatActivity implements MainFragmentCallback, MainActivityMVPContract.View {
     private static final String TAG = "MainActivity";
     int currentFragment;
     MainActivityPresenter presenter;

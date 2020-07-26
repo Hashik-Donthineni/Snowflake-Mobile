@@ -5,7 +5,7 @@ import android.util.Log;
 
 import org.torproject.snowflake.GlobalApplication;
 import org.torproject.snowflake.constants.AppPreferenceConstants;
-import org.torproject.snowflake.mvp.MainActivityMVP;
+import org.torproject.snowflake.mvp.MainActivityMVPContract;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,22 +19,22 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 /**
  * Model for MainActivity to handle network calls, Shared preferences.
  */
-public class MainActivityModel implements MainActivityMVP.Model {
+public class MainActivityModel implements MainActivityMVPContract.Model {
     private static final String TAG = "MainActivityModel";
     private static MainActivityModel instance = null;
     private SharedPreferences sharedPreferences;
-    private MainActivityMVP.Presenter presenter;
+    private MainActivityMVPContract.Presenter presenter;
     private int servedCount;
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
 
-    private MainActivityModel(MainActivityMVP.Presenter presenter) {
+    private MainActivityModel(MainActivityMVPContract.Presenter presenter) {
         sharedPreferences = GlobalApplication.getAppPreferences();
         this.presenter = presenter;
         servedCount = 0;
     }
 
-    public static MainActivityModel getInstance(MainActivityMVP.Presenter presenter) {
+    public static MainActivityModel getInstance(MainActivityMVPContract.Presenter presenter) {
         if (instance == null) {
             synchronized (MainActivityModel.class) {
                 instance = new MainActivityModel(presenter);

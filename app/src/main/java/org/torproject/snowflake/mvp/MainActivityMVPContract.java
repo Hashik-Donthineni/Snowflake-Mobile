@@ -3,7 +3,7 @@ package org.torproject.snowflake.mvp;
 /**
  * MVP contract Interface
  */
-public interface MainActivityMVP {
+public interface MainActivityMVPContract {
     interface View {
         void updateCountInFragment(int i);
     }

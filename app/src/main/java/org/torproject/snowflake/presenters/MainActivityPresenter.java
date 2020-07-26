@@ -3,17 +3,17 @@ package org.torproject.snowflake.presenters;
 import android.util.Log;
 
 import org.torproject.snowflake.models.MainActivityModel;
-import org.torproject.snowflake.mvp.MainActivityMVP;
+import org.torproject.snowflake.mvp.MainActivityMVPContract;
 
 /**
  * Presenter for MainActivity.
  */
-public class MainActivityPresenter implements MainActivityMVP.Presenter {
+public class MainActivityPresenter implements MainActivityMVPContract.Presenter {
     private static final String TAG = "MainActivityPresenter";
-    MainActivityMVP.View view;
-    MainActivityMVP.Model model;
+    MainActivityMVPContract.View view;
+    MainActivityMVPContract.Model model;
 
-    public MainActivityPresenter(MainActivityMVP.View view) {
+    public MainActivityPresenter(MainActivityMVPContract.View view) {
         //Attaching
         this.view = view;
         model = MainActivityModel.getInstance(this);
