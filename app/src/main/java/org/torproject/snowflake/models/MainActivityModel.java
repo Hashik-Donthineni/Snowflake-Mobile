@@ -4,7 +4,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.torproject.snowflake.GlobalApplication;
-import org.torproject.snowflake.constants.AppPreferenceConstants;
+import org.torproject.snowflake.constants.AppPreferenceKeys;
 import org.torproject.snowflake.mvp.MainActivityMVPContract;
 
 import java.text.ParseException;
@@ -44,19 +44,19 @@ public class MainActivityModel implements MainActivityMVPContract.Model {
     }
 
     public int getServedCount() {
-        return sharedPreferences.getInt(AppPreferenceConstants.USER_SERVED_KEY, 0);
+        return sharedPreferences.getInt(AppPreferenceKeys.USER_SERVED_KEY, 0);
     }
 
     public boolean getInitialRunBool() {
-        return sharedPreferences.getBoolean(AppPreferenceConstants.INITIAL_RUN_KEY, true);
+        return sharedPreferences.getBoolean(AppPreferenceKeys.INITIAL_RUN_KEY, true);
     }
 
     public void setInitialRunBool(boolean val) {
-        sharedPreferences.edit().putBoolean(AppPreferenceConstants.INITIAL_RUN_KEY, val).apply();
+        sharedPreferences.edit().putBoolean(AppPreferenceKeys.INITIAL_RUN_KEY, val).apply();
     }
 
     public boolean isServiceRunning() {
-        return sharedPreferences.getBoolean(AppPreferenceConstants.IS_SERVICE_RUNNING_KEY, false);
+        return sharedPreferences.getBoolean(AppPreferenceKeys.IS_SERVICE_RUNNING_KEY, false);
     }
 
     /**
@@ -71,7 +71,7 @@ public class MainActivityModel implements MainActivityMVPContract.Model {
         listener = (prefs, key) -> {
             Log.d(TAG, "setListenerForCount: Listener: Key = " + key);
 
-            if (key.equals(AppPreferenceConstants.USER_SERVED_KEY)) {
+            if (key.equals(AppPreferenceKeys.USER_SERVED_KEY)) {
                 servedCount = sharedPreferences.getInt(key, 0);
                 if (presenter != null)
                     presenter.updateServedCount(servedCount);
@@ -82,7 +82,7 @@ public class MainActivityModel implements MainActivityMVPContract.Model {
     }
 
     public String getDate() {
-        return sharedPreferences.getString(AppPreferenceConstants.DATE_KEY, "");
+        return sharedPreferences.getString(AppPreferenceKeys.DATE_KEY, "");
     }
 
     /**
@@ -90,8 +90,8 @@ public class MainActivityModel implements MainActivityMVPContract.Model {
      */
     public void setDateAndServed(String date, int value) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(AppPreferenceConstants.DATE_KEY, date);
-        editor.putInt(AppPreferenceConstants.USER_SERVED_KEY, value);
+        editor.putString(AppPreferenceKeys.DATE_KEY, date);
+        editor.putInt(AppPreferenceKeys.USER_SERVED_KEY, value);
         editor.apply();
     }
 

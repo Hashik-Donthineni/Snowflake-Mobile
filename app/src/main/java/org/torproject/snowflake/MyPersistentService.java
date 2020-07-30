@@ -16,7 +16,7 @@ import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
-import org.torproject.snowflake.constants.AppPreferenceConstants;
+import org.torproject.snowflake.constants.AppPreferenceKeys;
 import org.torproject.snowflake.constants.BrokerConstants;
 import org.torproject.snowflake.constants.ForegroundServiceConstants;
 import org.torproject.snowflake.exceptions.EmptySIDException;
@@ -81,7 +81,7 @@ public class MyPersistentService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: executed with startId: " + startId);
         sharedPreferences = getSharedPreferences(getString(R.string.sharedpreference_file), MODE_PRIVATE);
-        isServiceStarted = sharedPreferences.getBoolean(AppPreferenceConstants.IS_SERVICE_RUNNING_KEY, false);
+        isServiceStarted = sharedPreferences.getBoolean(AppPreferenceKeys.IS_SERVICE_RUNNING_KEY, false);
 
         if (intent != null) {
             if (intent.getAction().equals(ForegroundServiceConstants.ACTION_START))
@@ -133,10 +133,10 @@ public class MyPersistentService extends Service {
 
         if (setState == ForegroundServiceConstants.SERVICE_RUNNING) {
             isServiceStarted = true;
-            editor.putBoolean(AppPreferenceConstants.IS_SERVICE_RUNNING_KEY, true);
+            editor.putBoolean(AppPreferenceKeys.IS_SERVICE_RUNNING_KEY, true);
         } else {
             isServiceStarted = false;
-            editor.putBoolean(AppPreferenceConstants.IS_SERVICE_RUNNING_KEY, false);
+            editor.putBoolean(AppPreferenceKeys.IS_SERVICE_RUNNING_KEY, false);
         }
         editor.apply();
     }
@@ -147,8 +147,8 @@ public class MyPersistentService extends Service {
     private void updateServedCount() {
         SharedPreferences sp = GlobalApplication.getAppPreferences();
         sp.edit()
-                .putInt(AppPreferenceConstants.USER_SERVED_KEY,
-                        sp.getInt(AppPreferenceConstants.USER_SERVED_KEY, 0) + 1)
+                .putInt(AppPreferenceKeys.USER_SERVED_KEY,
+                        sp.getInt(AppPreferenceKeys.USER_SERVED_KEY, 0) + 1)
                 .apply();
     }
 
