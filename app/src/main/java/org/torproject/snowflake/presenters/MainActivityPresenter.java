@@ -80,11 +80,4 @@ public class MainActivityPresenter implements MainActivityMVPContract.Presenter 
     public void checkDate() {
         model.checkDateAsync();
     }
-
-    /**
-     * View for the MainActivity
-     */
-    public interface View {
-        void updateCountInFragment(int i);
-    }
 }
