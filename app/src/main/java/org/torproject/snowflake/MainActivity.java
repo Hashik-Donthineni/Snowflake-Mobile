@@ -27,7 +27,7 @@ import org.torproject.snowflake.presenters.MainActivityPresenter;
 public class MainActivity extends AppCompatActivity implements MainFragmentCallback, MainActivityMVPContract.View {
     private static final String TAG = "MainActivity";
     int currentFragment;
-    MainActivityPresenter presenter;
+    MainActivityMVPContract.Presenter presenter;
     //Indicates if model finished checking the date and reset served count if need be.
     boolean isCheckDateFinished;
     private Button settingsButton;

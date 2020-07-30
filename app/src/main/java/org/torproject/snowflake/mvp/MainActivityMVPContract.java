@@ -29,6 +29,8 @@ public interface MainActivityMVPContract {
 
         boolean isServiceRunning();
 
+        void detach();
+
         void updateServedCount(int count);
 
         void checkDate();
