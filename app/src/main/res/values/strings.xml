@@ -3,4 +3,6 @@
     <string name="not_channel_desc">This Channel should not be muted. The Android system will consider Snowflake not import and will kill the service if it\'s muted.</string>
     <string name="not_channel_name">Snowflake Service</string>
     <string name="users_served_text">Users you have helped circumvent censorship in the past day \n</string>
+    <string name="Snowflake_Off">Snowflake is Off</string>
+    <string name="Snowflake_On">Snowflake is On</string>
 </resources>

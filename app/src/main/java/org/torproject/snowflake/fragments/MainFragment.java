@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -52,15 +52,17 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         usersServedTV = rootView.findViewById(R.id.users_served);
-        Button startButton = rootView.findViewById(R.id.start_button);
+        Switch startButton = rootView.findViewById(R.id.start_button);
 
-        startButton.setOnClickListener(v -> {
-            if (callback.isServiceRunning()) //Toggling the service.
+        startButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (callback.isServiceRunning() && !isChecked) { //Toggling the service.
+                startButton.setText(getString(R.string.Snowflake_Off));
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_STOP);
-            else
+            } else {
+                startButton.setText(getString(R.string.Snowflake_On));
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_START);
+            }
         });
-
         showServed(callback.getServed());
 
         // Inflate the layout for this fragment

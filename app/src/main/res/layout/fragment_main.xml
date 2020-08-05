@@ -6,13 +6,16 @@
     tools:context=".fragments.MainFragment">
 
 
-    <Button
+    <Switch
         android:id="@+id/start_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:text="Service Toggle" />
+        android:layout_margin="20dp"
+        android:text="@string/Snowflake_Off"
+        android:textAlignment="textStart"
+        android:textColor="@color/colorText"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/users_served"
