@@ -37,8 +37,6 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
     //Indicates if model finished checking the date and reset served count if need be.
     boolean isCheckDateFinished;
     private Button settingsButton;
-    private Disposable disposable;
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
     boolean transitionToggle = false;
 
     @Override
