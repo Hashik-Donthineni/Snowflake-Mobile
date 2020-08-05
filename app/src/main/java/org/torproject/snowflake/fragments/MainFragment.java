@@ -50,7 +50,7 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         usersServedTV = rootView.findViewById(R.id.users_served);
         Button startButton = rootView.findViewById(R.id.start_button);
 
