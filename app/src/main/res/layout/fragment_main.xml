@@ -22,7 +22,7 @@
             android:text="@string/Snowflake_Off"
             android:textAlignment="textStart"
             android:textColor="@color/colorText"
-            android:textSize="20sp" />
+            android:textSize="22sp" />
 
         <ImageView
             android:id="@+id/snowflake_logo"
