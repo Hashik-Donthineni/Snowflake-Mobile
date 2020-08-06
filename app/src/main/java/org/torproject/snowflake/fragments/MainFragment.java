@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -30,6 +32,7 @@ public class MainFragment extends Fragment {
     MainFragmentCallback callback;
     TextView usersServedTV;
     TextView noteTV;
+    Animation textViewFade;
     ImageView snowflakeLogo;
     Switch startButton;
 
@@ -63,6 +66,7 @@ public class MainFragment extends Fragment {
         noteTV = rootView.findViewById(R.id.note_tv);
         startButton = rootView.findViewById(R.id.snowflake_switch);
         snowflakeLogo = rootView.findViewById(R.id.snowflake_logo);
+        textViewFade = AnimationUtils.loadAnimation(getActivity(), R.anim.fade);
 
         //If the service is running, set the button to on
         if (callback.isServiceRunning()) {
@@ -108,6 +112,8 @@ public class MainFragment extends Fragment {
      */
     private void setSnowflakeStatus(boolean status) {
         int from, to;
+        noteTV.startAnimation(textViewFade);
+
         if (status) { //Status on
             from = this.getResources().getColor(R.color.snowflakeOff);
             to = this.getResources().getColor(R.color.snowflakeOn);
