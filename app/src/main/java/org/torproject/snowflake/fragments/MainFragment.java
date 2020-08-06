@@ -1,5 +1,7 @@
 package org.torproject.snowflake.fragments;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
     MainFragmentCallback callback;
     TextView usersServedTV;
+    ImageView snowflakeLogo;
 
     public MainFragment() {
         // Required empty public constructor
@@ -56,15 +59,15 @@ public class MainFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         usersServedTV = rootView.findViewById(R.id.users_served);
         Switch startButton = rootView.findViewById(R.id.snowflake_switch);
-        ImageView snowflakeLogo = rootView.findViewById(R.id.snowflake_logo);
+        snowflakeLogo = rootView.findViewById(R.id.snowflake_logo);
 
         startButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (callback.isServiceRunning() && !isChecked) { //Toggling the service.
-                snowflakeLogo.setColorFilter(ContextCompat.getColor(getActivity(), R.color.snowflakeOff));
+                changeLogoColorStatus(false);
                 startButton.setText(getString(R.string.Snowflake_Off));
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_STOP);
             } else {
-                snowflakeLogo.setColorFilter(ContextCompat.getColor(getActivity(), R.color.snowflakeOn));
+                changeLogoColorStatus(true);
                 startButton.setText(getString(R.string.Snowflake_On));
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_START);
             }
@@ -89,5 +92,21 @@ public class MainFragment extends Fragment {
             String servedText = getString(R.string.users_served_text) + served;
             usersServedTV.setText(servedText);
         }
+    }
+
+    private void changeLogoColorStatus(boolean status) {
+        int from, to;
+        if (status) { //Status on
+            from = this.getResources().getColor(R.color.snowflakeOff);
+            to = this.getResources().getColor(R.color.snowflakeOn);
+        } else { //off
+            from = this.getResources().getColor(R.color.snowflakeOn);
+            to = this.getResources().getColor(R.color.snowflakeOff);
+        }
+
+        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
+        colorAnimation.setDuration(300); // milliseconds
+        colorAnimation.addUpdateListener(animator -> snowflakeLogo.setColorFilter((int) animator.getAnimatedValue(), PorterDuff.Mode.SRC_IN));
+        colorAnimation.start();
     }
 }
