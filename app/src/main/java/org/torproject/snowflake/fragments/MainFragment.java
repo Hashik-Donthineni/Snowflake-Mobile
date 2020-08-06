@@ -52,7 +52,7 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         usersServedTV = rootView.findViewById(R.id.users_served);
-        Switch startButton = rootView.findViewById(R.id.start_button);
+        Switch startButton = rootView.findViewById(R.id.snowflake_switch);
 
         startButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (callback.isServiceRunning() && !isChecked) { //Toggling the service.
