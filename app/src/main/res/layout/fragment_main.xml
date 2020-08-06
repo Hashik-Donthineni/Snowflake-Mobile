@@ -9,7 +9,7 @@
         android:id="@+id/start_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_alignParentStart="true"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
@@ -19,6 +19,12 @@
         android:textAlignment="textStart"
         android:textColor="@color/colorText"
         android:textSize="20sp" />
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_status_on" />
 
     <TextView
         android:id="@+id/users_served"
