@@ -1,15 +1,18 @@
 package org.torproject.snowflake.fragments;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import org.torproject.snowflake.R;
@@ -53,12 +56,15 @@ public class MainFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         usersServedTV = rootView.findViewById(R.id.users_served);
         Switch startButton = rootView.findViewById(R.id.snowflake_switch);
+        ImageView snowflakeLogo = rootView.findViewById(R.id.snowflake_logo);
 
         startButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (callback.isServiceRunning() && !isChecked) { //Toggling the service.
+                snowflakeLogo.setColorFilter(ContextCompat.getColor(getActivity(), R.color.snowflakeOff));
                 startButton.setText(getString(R.string.Snowflake_Off));
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_STOP);
             } else {
+                snowflakeLogo.setColorFilter(ContextCompat.getColor(getActivity(), R.color.snowflakeOn));
                 startButton.setText(getString(R.string.Snowflake_On));
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_START);
             }
