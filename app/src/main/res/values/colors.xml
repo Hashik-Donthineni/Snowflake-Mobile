@@ -5,4 +5,7 @@
     <color name="colorAccent">#CC80FF</color>
     <color name="colorText">#FFFF</color>
     <color name="colorTextSecondary">#757575</color>
+    <color name="snowflakeOff">#AAAAAA</color>
+    <color name="snowflakeOn">#8000D7</color>
+    <color name="snowflakeConnected">#00FFB0</color>
 </resources>
