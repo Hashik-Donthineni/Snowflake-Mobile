@@ -14,7 +14,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import org.torproject.snowflake.R;
@@ -56,10 +55,18 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: ");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         usersServedTV = rootView.findViewById(R.id.users_served);
         Switch startButton = rootView.findViewById(R.id.snowflake_switch);
         snowflakeLogo = rootView.findViewById(R.id.snowflake_logo);
+
+        //If the service is running, set the button to on
+        if (callback.isServiceRunning()) {
+            changeLogoColorStatus(true);
+            startButton.setChecked(true);
+            startButton.setText(getString(R.string.Snowflake_On));
+        }
 
         startButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (callback.isServiceRunning() && !isChecked) { //Toggling the service.
@@ -106,7 +113,7 @@ public class MainFragment extends Fragment {
 
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
         colorAnimation.setDuration(300); // milliseconds
-        colorAnimation.addUpdateListener(animator -> snowflakeLogo.setColorFilter((int) animator.getAnimatedValue(), PorterDuff.Mode.SRC_IN));
+        colorAnimation.addUpdateListener(animator -> snowflakeLogo.setColorFilter((int) animator.getAnimatedValue(), PorterDuff.Mode.SRC_ATOP));
         colorAnimation.start();
     }
 }
