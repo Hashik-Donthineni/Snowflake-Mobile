@@ -29,6 +29,7 @@ public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
     MainFragmentCallback callback;
     TextView usersServedTV;
+    TextView noteTV;
     ImageView snowflakeLogo;
     Switch startButton;
 
@@ -59,6 +60,7 @@ public class MainFragment extends Fragment {
         Log.d(TAG, "onCreateView: ");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         usersServedTV = rootView.findViewById(R.id.users_served);
+        noteTV = rootView.findViewById(R.id.note_tv);
         startButton = rootView.findViewById(R.id.snowflake_switch);
         snowflakeLogo = rootView.findViewById(R.id.snowflake_logo);
 
@@ -110,13 +112,15 @@ public class MainFragment extends Fragment {
             from = this.getResources().getColor(R.color.snowflakeOff);
             to = this.getResources().getColor(R.color.snowflakeOn);
             startButton.setText(getString(R.string.Snowflake_On));
+            noteTV.setText(getString(R.string.snowflake_ready_note));
         } else { //off
             from = this.getResources().getColor(R.color.snowflakeOn);
             to = this.getResources().getColor(R.color.snowflakeOff);
             startButton.setText(getString(R.string.Snowflake_Off));
+            noteTV.setText(getString(R.string.turn_on_note));
         }
 
-        //Animating the transition
+        //Animating the transition of logo
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
         colorAnimation.setDuration(300); // milliseconds
         colorAnimation.addUpdateListener(animator -> snowflakeLogo.setColorFilter((int) animator.getAnimatedValue(), PorterDuff.Mode.SRC_ATOP));
