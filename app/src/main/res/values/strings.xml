@@ -5,4 +5,6 @@
     <string name="users_served_text">Number of users your Snowflake has helped circumvent censorship in the last 24 hours: $</string>
     <string name="Snowflake_Off">Snowflake is Off</string>
     <string name="Snowflake_On">Snowflake is On</string>
+    <string name="turn_on_note">Turn on Snowflake to help users circumvent censorship</string>
+    <string name="snowflake_ready_note">Your Snowflake is ready to help users circumvent censorship</string>
 </resources>

@@ -34,17 +34,31 @@
             android:tint="@color/snowflakeOff" />
 
         <TextView
-            android:id="@+id/users_served"
-            android:layout_width="wrap_content"
+            android:id="@+id/note_tv"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/snowflake_logo"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="30dp"
             android:fontFamily="@font/source_code_pro"
             android:gravity="center"
-            android:paddingLeft="50dp"
-            android:paddingTop="10dp"
-            android:paddingRight="50dp"
+            android:text="@string/turn_on_note"
+            android:textSize="16sp"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/users_served"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/note_tv"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="30dp"
+            android:fontFamily="@font/source_code_pro"
+            android:gravity="center"
             android:textSize="16sp"
             android:visibility="gone" />
 
