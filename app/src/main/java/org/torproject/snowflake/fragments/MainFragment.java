@@ -30,6 +30,7 @@ public class MainFragment extends Fragment {
     MainFragmentCallback callback;
     TextView usersServedTV;
     ImageView snowflakeLogo;
+    Switch startButton;
 
     public MainFragment() {
         // Required empty public constructor
@@ -58,24 +59,21 @@ public class MainFragment extends Fragment {
         Log.d(TAG, "onCreateView: ");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         usersServedTV = rootView.findViewById(R.id.users_served);
-        Switch startButton = rootView.findViewById(R.id.snowflake_switch);
+        startButton = rootView.findViewById(R.id.snowflake_switch);
         snowflakeLogo = rootView.findViewById(R.id.snowflake_logo);
 
         //If the service is running, set the button to on
         if (callback.isServiceRunning()) {
-            changeLogoColorStatus(true);
+            setSnowflakeStatus(true);
             startButton.setChecked(true);
-            startButton.setText(getString(R.string.Snowflake_On));
         }
 
         startButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (callback.isServiceRunning() && !isChecked) { //Toggling the service.
-                changeLogoColorStatus(false);
-                startButton.setText(getString(R.string.Snowflake_Off));
+                setSnowflakeStatus(false);
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_STOP);
             } else {
-                changeLogoColorStatus(true);
-                startButton.setText(getString(R.string.Snowflake_On));
+                setSnowflakeStatus(true);
                 callback.serviceToggle(ForegroundServiceConstants.ACTION_START);
             }
         });
@@ -101,16 +99,24 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void changeLogoColorStatus(boolean status) {
+    /**
+     * Used to update the UI elements with corresponding status of the Snowflake.
+     *
+     * @param status Indicates the status that we want to sent status to.
+     */
+    private void setSnowflakeStatus(boolean status) {
         int from, to;
         if (status) { //Status on
             from = this.getResources().getColor(R.color.snowflakeOff);
             to = this.getResources().getColor(R.color.snowflakeOn);
+            startButton.setText(getString(R.string.Snowflake_On));
         } else { //off
             from = this.getResources().getColor(R.color.snowflakeOn);
             to = this.getResources().getColor(R.color.snowflakeOff);
+            startButton.setText(getString(R.string.Snowflake_Off));
         }
 
+        //Animating the transition
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
         colorAnimation.setDuration(300); // milliseconds
         colorAnimation.addUpdateListener(animator -> snowflakeLogo.setColorFilter((int) animator.getAnimatedValue(), PorterDuff.Mode.SRC_ATOP));
