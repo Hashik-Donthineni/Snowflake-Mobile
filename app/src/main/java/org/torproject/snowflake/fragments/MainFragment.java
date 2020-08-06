@@ -80,7 +80,8 @@ public class MainFragment extends Fragment {
 
         if (served > 0) {
             usersServedTV.setVisibility(View.VISIBLE);
-            usersServedTV.setText(getString(R.string.users_served_text) + served);
+            String servedText = getString(R.string.users_served_text) + served;
+            usersServedTV.setText(servedText);
         }
     }
 }
