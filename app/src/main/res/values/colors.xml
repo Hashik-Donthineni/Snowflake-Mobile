@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#1C1C1C</color>
     <color name="colorPrimaryDark">#1C1C1C</color>
-    <color name="colorAccent">#CC80FF</color>
+    <color name="colorAccent">#8000D7</color>
     <color name="colorText">#FFFF</color>
     <color name="colorTextSecondary">#757575</color>
     <color name="snowflakeOff">#AAAAAA</color>
