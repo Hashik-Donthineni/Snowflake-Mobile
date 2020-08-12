@@ -89,24 +89,9 @@ public class MainActivity extends AppCompatActivity implements MainFragmentCallb
 
         Log.d(TAG, "startFragment: " + currentFragment);
 
-        //////Animation
-
-        Slide slideTransition;
-        //This defines how the fragment moves. Either from left to right or right to left.
-        int gravity = transitionToggle ? Gravity.END : Gravity.START;
-        transitionToggle = !transitionToggle;
-        if (Build.VERSION.SDK_INT > 21) {
-            slideTransition = new Slide(gravity);
-        } else {
-            slideTransition = new Slide(GravityCompat.getAbsoluteGravity(gravity, getResources().getConfiguration().getLayoutDirection()));
-        }
-        slideTransition.setDuration(400);
-
-        fragment.setEnterTransition(slideTransition);
-        //////
-
         getSupportFragmentManager()
                 .beginTransaction()
+                .setCustomAnimations(R.anim.frag_entry_slide, R.anim.frag_exit_slide)
                 .replace(R.id.fragment_container,
                         fragment, Integer.toString(currentFragment)).commit();
     }
